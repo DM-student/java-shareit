@@ -1,7 +1,12 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * TODO Sprint add-controllers.
@@ -9,4 +14,36 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/items")
 public class ItemController {
+    @Autowired
+    private ItemService itemService;
+
+    @GetMapping("/{id}")
+    public ItemDto get(@PathVariable Long id) {
+        return itemService.get(id);
+    }
+    @GetMapping
+    public List<ItemDto> getAll(@RequestHeader(name = "X-Sharer-User-Id") Optional<Long> ownerId) {
+        if (ownerId.isPresent()) {
+            return itemService.getAllForUser(ownerId.get());
+        }
+        return itemService.getAll();
+    }
+    @PostMapping
+    public ItemDto upload(@RequestBody ItemDto item, @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
+        item.setOwner(new UserDto(ownerId, null, null, false));
+        return itemService.upload(item);
+    }
+    @PatchMapping("/{id}")
+    public ItemDto update(@PathVariable long id, @RequestBody ItemDto item,
+                          @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
+        if(ownerId != null) {
+            item.setOwner(new UserDto(ownerId, null, null, false));
+        }
+        item.setId(id);
+        return itemService.update(item);
+    }
+    @DeleteMapping("/{id}")
+    public ItemDto delete(@PathVariable long id) {
+        return itemService.delete(id);
+    }
 }
