@@ -18,9 +18,3 @@ CREATE TABLE IF NOT EXISTS users_to_items(
 	item_id BIGINT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
 	CONSTRAINT unique_users_to_items_entry UNIQUE (user_id, item_id)
 );
-
-CREATE TABLE IF NOT EXISTS search_history (
-        id BIGINT NOT NULL PRIMARY KEY,
-        user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        name VARCHAR(64) NOT NULL
-);

@@ -53,11 +53,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getSearchedItems(@RequestHeader(name = "X-Sharer-User-Id") Optional<Long> ownerId,
-                                          @RequestParam String text) {
-        if (ownerId.isPresent()) {
-            return itemService.getSearched(text);
-        }
-        throw new ProfileDataException("Идентификатор пользователя не указан!");
+    public List<ItemDto> getSearchedItems(@RequestParam String text) {
+        // Оно как бы передаёт айди, как я понял, того кто ищет. Я вот не уверен,
+        // стоит ли это логировать и/или делать обязательным для указания при
+        // запросе по этому пути.
+        return itemService.getSearched(text);
+
     }
 }

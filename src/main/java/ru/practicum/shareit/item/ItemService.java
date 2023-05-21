@@ -38,7 +38,7 @@ public class ItemService {
     }
 
     public List<ItemDto> getAllForUser(Long id) {
-        String args[] = new String[2];
+        String[] args = new String[2];
         args[0] = "user";
         args[1] = id.toString();
         return storage.specialGet(args).stream().map(u -> mapper.mapToDto(u, true)).collect(Collectors.toList());

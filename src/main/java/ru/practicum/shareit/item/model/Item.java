@@ -26,6 +26,8 @@ public class Item {
     @NotNull(message = "Параметр доступности обязан присутствовать!")
     private Boolean available;
 
+    // Булево значение "request" я добавлю когда буду работать над add-item-requests.
+
     public void mergeFrom(Item otherItem) {
         if (otherItem.id != null) {
             id = otherItem.id;

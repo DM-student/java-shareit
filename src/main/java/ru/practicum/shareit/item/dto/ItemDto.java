@@ -17,5 +17,5 @@ public class ItemDto {
     private String description;
     private Boolean available;
 
-    private boolean _fullData = true;
+    private boolean fullData = true; // Нужно для nesting'а ДТО.
 }

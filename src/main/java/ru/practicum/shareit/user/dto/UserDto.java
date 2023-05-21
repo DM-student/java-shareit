@@ -13,12 +13,12 @@ public class UserDto {
     private String name;
     private Set<ItemDto> items = new HashSet<>();
 
-    private boolean _fullData = true;
+    private boolean fullData = true; // Нужно для nesting'а ДТО.
 
-    public UserDto(Long id, String email, String name, boolean _fullData) {
+    public UserDto(Long id, String email, String name, boolean fullData) {
         this.id = id;
         this.email = email;
         this.name = name;
-        this._fullData = _fullData;
+        this.fullData = fullData;
     }
 }
