@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.data.Storage;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ItemService {
     @Autowired
@@ -71,5 +73,15 @@ public class ItemService {
 
     public ItemDto delete(long id) {
         return mapper.mapToDto(storage.delete(id), true);
+    }
+
+    public List<ItemDto> getSearched(String query) {
+        String[] args = new String[2];
+        args[0] = "search";
+        args[1] = query;
+        List<ItemDto> output = storage.specialGet(args).stream()
+                .map(u -> mapper.mapToDto(u, true)).collect(Collectors.toList());
+        log.info("Возвращён список предметов по поисковому запросу \"{}\", размер списка: {}.", query, output.size());
+        return output;
     }
 }

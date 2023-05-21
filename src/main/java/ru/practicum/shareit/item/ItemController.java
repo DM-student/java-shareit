@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.awt.color.ProfileDataException;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,5 +46,14 @@ public class ItemController {
     @DeleteMapping("/{id}")
     public ItemDto delete(@PathVariable long id) {
         return itemService.delete(id);
+    }
+
+    @GetMapping("/search")
+    public List<ItemDto> getSearchedItems(@RequestHeader(name = "X-Sharer-User-Id") Optional<Long> ownerId,
+                                          @RequestParam String text) {
+        if (ownerId.isPresent()) {
+            return itemService.getSearched(text);
+        }
+        throw new ProfileDataException("Идентификатор пользователя не указан!");
     }
 }

@@ -75,6 +75,34 @@ public class ItemStorage implements Storage<Item> {
         }
         return items;
     }
+    private List<Item> getAllForSearchQuery(String query, boolean ignoreAvailable) {
+        if(query == null || getTextForSearch(query).isBlank()) {
+            return Collections.emptyList();
+        }
+        String modifiedQuery = "%"+ getTextForSearch(query) + "%";
+        String sqlQuery = "select id " +
+                "from items " +
+                "where (name_for_searching like ? " +
+                "or description_for_searching like ?) ";
+        if(!ignoreAvailable) {
+            sqlQuery += "and available = true";
+        }
+        SqlRowSet sqlRows = jdbcTemplate.queryForRowSet(sqlQuery, modifiedQuery, modifiedQuery);
+        Set<Long> itemsIds = new HashSet<>();
+        while(sqlRows.next()) {
+            itemsIds.add(sqlRows.getLong("id"));
+        }
+        List<Item> items = new ArrayList<>();
+        for(long id : itemsIds) {
+            items.add(get(id));
+        }
+        return items;
+    }
+
+    private String getTextForSearch(String text) {
+        return  text.toLowerCase().replaceAll("[^а-яa-z]", "");
+    }
+
 
     // Мне намного проще портировать этот небольшой метод пока-что.
     private Set<Long> getUserItemsIds(long userId) {
@@ -111,16 +139,17 @@ public class ItemStorage implements Storage<Item> {
     @Override
     public Item upload(Item obj) {
         String sqlQuery = "insert into items" +
-                "(id, name, description, available) " +
-                "values (?, ?, ?, ?)";
+                "(id, name, name_for_searching, description, description_for_searching, available) " +
+                "values (?, ?, ?, ?, ?, ?)";
         obj.setId(lastId + 1);
-        jdbcTemplate.update(sqlQuery, obj.getId(), obj.getName(),
-                obj.getDescription(), obj.getAvailable());
+        jdbcTemplate.update(sqlQuery, obj.getId(), obj.getName(), getTextForSearch(obj.getName()),
+                obj.getDescription(), getTextForSearch(obj.getDescription()), obj.getAvailable());
         if(obj.getOwnerId() != null) {
             setItemOwner(obj.getOwnerId(), obj.getId());
         }
         lastId++;
         log.info("Загружен новый предмет в БД: id = {}, name = \"{}\"", obj.getId(), obj.getName());
+        log.warn("getTextForSearch(obj.getDescription()) = {}", getTextForSearch(obj.getDescription()));
         return obj;
     }
 
@@ -129,14 +158,15 @@ public class ItemStorage implements Storage<Item> {
         get(obj.getId());
 
         String sqlQuery = "update items set " +
-                "name = ?, description = ?, available = ? " +
+                "name = ?, name_for_searching = ?, description = ?, description_for_searching = ?, available = ? " +
                 "where id = ?";
-        jdbcTemplate.update(sqlQuery, obj.getName(),
-                obj.getDescription(), obj.getAvailable(), obj.getId());
+        jdbcTemplate.update(sqlQuery, obj.getName(), getTextForSearch(obj.getName()),
+                obj.getDescription(), getTextForSearch(obj.getDescription()), obj.getAvailable(), obj.getId());
         if(obj.getOwnerId() != null) {
             setItemOwner(obj.getOwnerId(), obj.getId());
         }
         log.info("Обновлён предмет в БД: id = {}, name = \"{}\"", obj.getId(), obj.getName());
+        log.warn("getTextForSearch(obj.getDescription()) = {}", getTextForSearch(obj.getDescription()));
         return obj;
     }
     @Override
@@ -153,14 +183,19 @@ public class ItemStorage implements Storage<Item> {
         List<String> argsList = Arrays.asList(args);
         switch(argsList.get(0)) {
             case "user":
-                if(argsList.get(1) == null) {
-                    throw new IllegalArgumentException("specialGet получил null в качестве второго аргумента.");
-                }
                 return getAllForUser(Long.parseLong(argsList.get(1)));
+            case "search":
+                boolean ignoreAvailable = false;
+                if(argsList.size() > 2) {
+                    ignoreAvailable = Objects.equals(argsList.get(2), "ignoreAvailable");
+                }
+                return getAllForSearchQuery(argsList.get(1), ignoreAvailable);
             default:
-                throw new IllegalArgumentException("specialGet получил неверные аргументы.");
+                throw new IllegalArgumentException("specialGet получил неверный ключ операции.");
         }
     }
+
+
 
     @Override
     public void specialAction(String[] args) {
