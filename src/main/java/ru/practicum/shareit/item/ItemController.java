@@ -22,6 +22,7 @@ public class ItemController {
     public ItemDto get(@PathVariable Long id) {
         return itemService.get(id);
     }
+
     @GetMapping
     public List<ItemDto> getAll(@RequestHeader(name = "X-Sharer-User-Id") Optional<Long> ownerId) {
         if (ownerId.isPresent()) {
@@ -29,20 +30,23 @@ public class ItemController {
         }
         return itemService.getAll();
     }
+
     @PostMapping
     public ItemDto upload(@RequestBody ItemDto item, @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
         item.setOwner(new UserDto(ownerId, null, null, false));
         return itemService.upload(item);
     }
+
     @PatchMapping("/{id}")
     public ItemDto update(@PathVariable long id, @RequestBody ItemDto item,
                           @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
-        if(ownerId != null) {
+        if (ownerId != null) {
             item.setOwner(new UserDto(ownerId, null, null, false));
         }
         item.setId(id);
         return itemService.update(item);
     }
+
     @DeleteMapping("/{id}")
     public ItemDto delete(@PathVariable long id) {
         return itemService.delete(id);

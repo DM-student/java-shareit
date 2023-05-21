@@ -9,7 +9,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utility.JavaxValidationHandler;
 import ru.practicum.shareit.utility.exceptions.ValidationExceptionForHandler;
 
-import javax.validation.ValidationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ public class UserService {
 
     public UserDto upload(UserDto user) {
         User newUser = mapper.mapFromDto(user);
-        if(!validation.validate(newUser)) {
+        if (!validation.validate(newUser)) {
             throw new ValidationExceptionForHandler("Пользователь не прошёл валидацию.",
                     validation.validateFull(newUser));
         }
@@ -44,7 +43,7 @@ public class UserService {
         User newUser = mapper.mapFromDto(user);
         User oldUser = storage.get(user.getId());
         oldUser.mergeFrom(newUser);
-        if(!validation.validate(oldUser)) {
+        if (!validation.validate(oldUser)) {
             throw new ValidationExceptionForHandler("Пользователь не прошёл валидацию.",
                     validation.validateFull(oldUser));
         }

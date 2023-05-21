@@ -11,9 +11,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utility.exceptions.ConflictExceptionForHandler;
 import ru.practicum.shareit.utility.exceptions.NotFoundExceptionForHandler;
-import ru.practicum.shareit.utility.exceptions.ProvidedDataExceptionForHandler;
 
-import javax.validation.ValidationException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +28,7 @@ public class UserStorage implements Storage<User> {
         Set<Long> items = new HashSet<>();
         SqlRowSet sqlRows = jdbcTemplate.queryForRowSet("select item_id from " +
                 "users_to_items where user_id = ?", userId);
-        while(sqlRows.next()) {
+        while (sqlRows.next()) {
             items.add(sqlRows.getLong("item_id"));
         }
         return items;
@@ -40,7 +38,7 @@ public class UserStorage implements Storage<User> {
         String sqlQuery = "insert into users_to_items" +
                 "(user_id, item_id) " +
                 "values (?, ?)";
-        for(long item : items) {
+        for (long item : items) {
             try {
                 jdbcTemplate.update(sqlQuery, userId, item);
             } catch (DuplicateKeyException e) {
@@ -117,7 +115,7 @@ public class UserStorage implements Storage<User> {
 
     @Override
     public User upload(User obj) {
-        if(!getByEmail(obj.getEmail()).isEmpty()) {
+        if (!getByEmail(obj.getEmail()).isEmpty()) {
             throw new ConflictExceptionForHandler("Пользователь с данным адресом " +
                     "электронной почты уже есть в БД.", "Предоставленный объект: " + obj);
         }
@@ -135,7 +133,7 @@ public class UserStorage implements Storage<User> {
 
     @Override
     public User update(User obj) {
-        if(!getByEmail(obj.getEmail()).isEmpty()) {
+        if (!getByEmail(obj.getEmail()).isEmpty()) {
             if (!Objects.equals(getByEmail(obj.getEmail()).get(0).getId(), obj.getId())) {
                 throw new ConflictExceptionForHandler("Пользователь с данным адресом " +
                         "электронной почты уже есть в БД.", "Предоставленный объект: " + obj);
@@ -157,7 +155,7 @@ public class UserStorage implements Storage<User> {
     public User delete(long id) {
         // Как я понимаю, если пользователь удалён - нужно удалить все его вещи.
         List<Long> items = itemStorage.getAll().stream().map(Item::getId).collect(Collectors.toList());
-        for(long item : items) {
+        for (long item : items) {
             itemStorage.delete(item);
         }
 
@@ -171,9 +169,9 @@ public class UserStorage implements Storage<User> {
     @Override
     public List<User> specialGet(String[] args) {
         List<String> argsList = Arrays.asList(args);
-        switch(argsList.get(0)) {
+        switch (argsList.get(0)) {
             case "email":
-                if(argsList.get(1) == null) {
+                if (argsList.get(1) == null) {
                     return null;
                 }
                 return getByEmail(argsList.get(1));

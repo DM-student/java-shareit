@@ -16,11 +16,10 @@ public class UserDtoMapper {
     @Lazy
     private ItemDtoMapper itemMapper;
 
-    public UserDto mapToDto(User user, boolean fullData)
-    {
+    public UserDto mapToDto(User user, boolean fullData) {
         UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getName(), fullData);
-        if(fullData && user.getId() != null) {
-            for(long i : user.getItemsIds()) {
+        if (fullData && user.getId() != null) {
+            for (long i : user.getItemsIds()) {
                 ItemDto item = itemMapper.mapToDto(items.get(i), false);
                 userDto.getItems().add(item);
             }
@@ -28,9 +27,10 @@ public class UserDtoMapper {
         }
         return userDto;
     }
+
     public User mapFromDto(UserDto user) {
         User newUser = new User(user.getId(), user.getName(), user.getEmail());
-        for(ItemDto item : user.getItems()) {
+        for (ItemDto item : user.getItems()) {
             newUser.getItemsIds().add(item.getId());
         }
         return newUser;

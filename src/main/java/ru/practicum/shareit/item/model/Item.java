@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.apache.logging.log4j.message.Message;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -28,19 +27,19 @@ public class Item {
     private Boolean available;
 
     public void mergeFrom(Item otherItem) {
-        if(otherItem.id != null) {
+        if (otherItem.id != null) {
             id = otherItem.id;
         }
-        if(otherItem.ownerId != null) {
+        if (otherItem.ownerId != null) {
             ownerId = otherItem.ownerId;
         }
-        if(otherItem.name != null) {
+        if (otherItem.name != null) {
             name = otherItem.name;
         }
-        if(otherItem.description != null) {
+        if (otherItem.description != null) {
             description = otherItem.description;
         }
-        if(otherItem.available != null) {
+        if (otherItem.available != null) {
             available = otherItem.available;
         }
     }

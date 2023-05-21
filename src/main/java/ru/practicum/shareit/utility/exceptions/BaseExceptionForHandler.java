@@ -1,12 +1,12 @@
 package ru.practicum.shareit.utility.exceptions;
 
-public class BaseExceptionForHandler extends RuntimeException{
+public class BaseExceptionForHandler extends RuntimeException {
     private final String errorInfo;
     private final String errorData;
 
     @Override
     public String getMessage() {
-        if(errorInfo == null) {
+        if (errorInfo == null) {
             return super.getMessage();
         }
         return errorInfo;
@@ -16,12 +16,11 @@ public class BaseExceptionForHandler extends RuntimeException{
         return errorData;
     }
 
-    public BaseExceptionForHandler (String info, Object data) {
+    public BaseExceptionForHandler(String info, Object data) {
         errorInfo = info;
-        if(data != null) {
+        if (data != null) {
             errorData = data.toString();
-        }
-        else {
+        } else {
             errorData = null;
         }
     }

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -34,16 +33,16 @@ public class User {
     }
 
     public void mergeFrom(User otherUser) {
-        if(otherUser.id != null) {
+        if (otherUser.id != null) {
             id = otherUser.id;
         }
-        if(otherUser.itemsIds != null) {
+        if (otherUser.itemsIds != null) {
             itemsIds = otherUser.itemsIds;
         }
-        if(otherUser.name != null) {
+        if (otherUser.name != null) {
             name = otherUser.name;
         }
-        if(otherUser.email != null) {
+        if (otherUser.email != null) {
             email = otherUser.email;
         }
     }

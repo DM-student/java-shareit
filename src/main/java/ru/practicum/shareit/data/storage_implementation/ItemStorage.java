@@ -23,7 +23,7 @@ public class ItemStorage implements Storage<Item> {
     private Long getItemOwnerId(long itemId) {
         SqlRowSet sqlRows = jdbcTemplate.queryForRowSet("select user_id from " +
                 "users_to_items where item_id = ?", itemId);
-        if(sqlRows.next()) {
+        if (sqlRows.next()) {
             return sqlRows.getLong("user_id");
         }
         return null;
@@ -58,7 +58,7 @@ public class ItemStorage implements Storage<Item> {
                     sqlRows.getString("name"),
                     sqlRows.getString("description"),
                     sqlRows.getBoolean("available")
-                    );
+            );
             newItem.setOwnerId(getItemOwnerId(newItem.getId()));
             log.info("Найден предмет в БД: id = {}, name = \"{}\"", newItem.getId(), newItem.getName());
             return newItem;
@@ -70,37 +70,38 @@ public class ItemStorage implements Storage<Item> {
     private List<Item> getAllForUser(long userId) {
         Set<Long> itemsIds = getUserItemsIds(userId);
         List<Item> items = new ArrayList<>();
-        for(long id : itemsIds) {
+        for (long id : itemsIds) {
             items.add(get(id));
         }
         return items;
     }
+
     private List<Item> getAllForSearchQuery(String query, boolean ignoreAvailable) {
-        if(query == null || getTextForSearch(query).isBlank()) {
+        if (query == null || getTextForSearch(query).isBlank()) {
             return Collections.emptyList();
         }
-        String modifiedQuery = "%"+ getTextForSearch(query) + "%";
+        String modifiedQuery = "%" + getTextForSearch(query) + "%";
         String sqlQuery = "select id " +
                 "from items " +
                 "where (name_for_searching like ? " +
                 "or description_for_searching like ?) ";
-        if(!ignoreAvailable) {
+        if (!ignoreAvailable) {
             sqlQuery += "and available = true";
         }
         SqlRowSet sqlRows = jdbcTemplate.queryForRowSet(sqlQuery, modifiedQuery, modifiedQuery);
         Set<Long> itemsIds = new HashSet<>();
-        while(sqlRows.next()) {
+        while (sqlRows.next()) {
             itemsIds.add(sqlRows.getLong("id"));
         }
         List<Item> items = new ArrayList<>();
-        for(long id : itemsIds) {
+        for (long id : itemsIds) {
             items.add(get(id));
         }
         return items;
     }
 
     private String getTextForSearch(String text) {
-        return  text.toLowerCase().replaceAll("[^а-яa-z]", "");
+        return text.toLowerCase().replaceAll("[^а-яa-z]", "");
     }
 
 
@@ -109,10 +110,10 @@ public class ItemStorage implements Storage<Item> {
         Set<Long> items = new HashSet<>();
         SqlRowSet sqlRows = jdbcTemplate.queryForRowSet("select item_id from " +
                 "users_to_items where user_id = ?", userId);
-        while(sqlRows.next()) {
+        while (sqlRows.next()) {
             items.add(sqlRows.getLong("item_id"));
         }
-        log.info("Возвращён полный список предметов пользователя ID#{} размером: {}",userId, items.size());
+        log.info("Возвращён полный список предметов пользователя ID#{} размером: {}", userId, items.size());
         return items;
     }
 
@@ -144,7 +145,7 @@ public class ItemStorage implements Storage<Item> {
         obj.setId(lastId + 1);
         jdbcTemplate.update(sqlQuery, obj.getId(), obj.getName(), getTextForSearch(obj.getName()),
                 obj.getDescription(), getTextForSearch(obj.getDescription()), obj.getAvailable());
-        if(obj.getOwnerId() != null) {
+        if (obj.getOwnerId() != null) {
             setItemOwner(obj.getOwnerId(), obj.getId());
         }
         lastId++;
@@ -162,13 +163,14 @@ public class ItemStorage implements Storage<Item> {
                 "where id = ?";
         jdbcTemplate.update(sqlQuery, obj.getName(), getTextForSearch(obj.getName()),
                 obj.getDescription(), getTextForSearch(obj.getDescription()), obj.getAvailable(), obj.getId());
-        if(obj.getOwnerId() != null) {
+        if (obj.getOwnerId() != null) {
             setItemOwner(obj.getOwnerId(), obj.getId());
         }
         log.info("Обновлён предмет в БД: id = {}, name = \"{}\"", obj.getId(), obj.getName());
         log.warn("getTextForSearch(obj.getDescription()) = {}", getTextForSearch(obj.getDescription()));
         return obj;
     }
+
     @Override
     public Item delete(long id) {
         Item deletedItem = get(id);
@@ -181,12 +183,12 @@ public class ItemStorage implements Storage<Item> {
     @Override
     public List<Item> specialGet(String[] args) {
         List<String> argsList = Arrays.asList(args);
-        switch(argsList.get(0)) {
+        switch (argsList.get(0)) {
             case "user":
                 return getAllForUser(Long.parseLong(argsList.get(1)));
             case "search":
                 boolean ignoreAvailable = false;
-                if(argsList.size() > 2) {
+                if (argsList.size() > 2) {
                     ignoreAvailable = Objects.equals(argsList.get(2), "ignoreAvailable");
                 }
                 return getAllForSearchQuery(argsList.get(1), ignoreAvailable);
@@ -194,7 +196,6 @@ public class ItemStorage implements Storage<Item> {
                 throw new IllegalArgumentException("specialGet получил неверный ключ операции.");
         }
     }
-
 
 
     @Override

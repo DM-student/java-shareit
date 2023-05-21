@@ -12,7 +12,6 @@ import ru.practicum.shareit.utility.JavaxValidationHandler;
 import ru.practicum.shareit.utility.exceptions.NotFoundExceptionForHandler;
 import ru.practicum.shareit.utility.exceptions.ValidationExceptionForHandler;
 
-import javax.validation.ValidationException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -47,7 +46,7 @@ public class ItemService {
 
     public ItemDto upload(ItemDto item) {
         Item newItem = mapper.mapFromDto(item);
-        if(!validation.validate(newItem)) {
+        if (!validation.validate(newItem)) {
             throw new ValidationExceptionForHandler("Предмет не прошёл валидацию.",
                     validation.validateFull(newItem));
         }
@@ -60,12 +59,12 @@ public class ItemService {
         Item oldItem = storage.get(item.getId());
         oldItem.mergeFrom(newItem);
 
-        if(!validation.validate(oldItem)) {
+        if (!validation.validate(oldItem)) {
             throw new ValidationExceptionForHandler("Предмет не прошёл валидацию.",
                     validation.validateFull(oldItem));
         }
 
-        if(!Objects.equals(storage.get(item.getId()).getOwnerId(), item.getOwner().getId())) {
+        if (!Objects.equals(storage.get(item.getId()).getOwnerId(), item.getOwner().getId())) {
             throw new NotFoundExceptionForHandler("При обновлении предмета указан новый пользователь.", item);
         }
         return mapper.mapToDto(storage.update(oldItem), true);
