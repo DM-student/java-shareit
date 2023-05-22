@@ -10,9 +10,4 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 public class ItemRequest {
-    private long id = Long.MIN_VALUE;
-    private long ownerId = Long.MIN_VALUE;
-
-    @NotBlank
-    private String name;
 }

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.data.Storage;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utility.exceptions.ConflictExceptionForHandler;
-import ru.practicum.shareit.utility.exceptions.NotFoundExceptionForHandler;
+import ru.practicum.shareit.utility.exceptions.ShareItConflictException;
+import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,7 +42,9 @@ public class UserStorage implements Storage<User> {
             try {
                 jdbcTemplate.update(sqlQuery, userId, item);
             } catch (DuplicateKeyException e) {
-                // Nothing really.
+                // Это исключение должно и будет постоянно выскакивать, ибо там стоит условие unique,
+                // которое не даёт создать дубликат. За сим обработка его не требуется. Банально выскакивая - оно
+                // уже выполняет задачу по ограничению добавления дубликата.
             }
         }
     }
@@ -67,7 +69,7 @@ public class UserStorage implements Storage<User> {
             log.info("Найден пользователь в БД: id = {}, email = \"{}\"", newUser.getId(), newUser.getEmail());
             return newUser;
         } else {
-            throw new NotFoundExceptionForHandler("Пользователь не найден.", "id#" + id);
+            throw new ShareItNotFoundException("Пользователь не найден.", "id#" + id);
         }
 
     }
@@ -85,6 +87,7 @@ public class UserStorage implements Storage<User> {
                     sqlRows.getString("name"),
                     sqlRows.getString("email")
             );
+            // Я не представляю, как тут всё реализовать одним запросом.
             newUser.getItemsIds().addAll(getUserItems(newUser.getId()));
             log.info("Найден пользователь в БД: id = {}, email = \"{}\"", newUser.getId(), newUser.getEmail());
             users.add(newUser);
@@ -114,9 +117,9 @@ public class UserStorage implements Storage<User> {
     }
 
     @Override
-    public User upload(User obj) {
+    public User create(User obj) {
         if (!getByEmail(obj.getEmail()).isEmpty()) {
-            throw new ConflictExceptionForHandler("Пользователь с данным адресом " +
+            throw new ShareItConflictException("Пользователь с данным адресом " +
                     "электронной почты уже есть в БД.", "Предоставленный объект: " + obj);
         }
 
@@ -135,7 +138,7 @@ public class UserStorage implements Storage<User> {
     public User update(User obj) {
         if (!getByEmail(obj.getEmail()).isEmpty()) {
             if (!Objects.equals(getByEmail(obj.getEmail()).get(0).getId(), obj.getId())) {
-                throw new ConflictExceptionForHandler("Пользователь с данным адресом " +
+                throw new ShareItConflictException("Пользователь с данным адресом " +
                         "электронной почты уже есть в БД.", "Предоставленный объект: " + obj);
             }
         }
@@ -178,11 +181,6 @@ public class UserStorage implements Storage<User> {
             default:
                 throw new IllegalArgumentException("specialGet получил неверные аргументы.");
         }
-    }
-
-    @Override
-    public void specialAction(String[] args) {
-
     }
 
     @Autowired

@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
         id BIGINT NOT NULL PRIMARY KEY,
         email VARCHAR(320) NOT NULL,
-        name VARCHAR(64) NOT NULL
+        name VARCHAR(64) NOT NULL,
+        CONSTRAINT unique_email UNIQUE (email)
 );
 
 CREATE TABLE IF NOT EXISTS items (

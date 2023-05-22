@@ -1,6 +1,6 @@
 package ru.practicum.shareit.utility.exceptions;
 
-public class BaseExceptionForHandler extends RuntimeException {
+public class ShareItBaseExceptionBaseException extends RuntimeException {
     private final String errorInfo;
     private final String errorData;
 
@@ -16,7 +16,7 @@ public class BaseExceptionForHandler extends RuntimeException {
         return errorData;
     }
 
-    public BaseExceptionForHandler(String info, Object data) {
+    public ShareItBaseExceptionBaseException(String info, Object data) {
         errorInfo = info;
         if (data != null) {
             errorData = data.toString();

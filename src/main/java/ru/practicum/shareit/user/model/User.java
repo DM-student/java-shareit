@@ -8,9 +8,6 @@ import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 public class User {
     private Long id;

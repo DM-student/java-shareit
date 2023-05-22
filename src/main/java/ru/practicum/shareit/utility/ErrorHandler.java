@@ -12,19 +12,19 @@ import java.util.Map;
 @ControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler
-    public ResponseEntity<Map<String, String>> getResponseEntity(BaseExceptionForHandler e) {
+    public ResponseEntity<Map<String, String>> getResponseEntity(ShareItBaseExceptionBaseException e) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
-        if (e.getClass() == ProvidedDataExceptionForHandler.class) {
+        if (e.getClass() == ShareItProvidedDataException.class) {
             status = HttpStatus.BAD_REQUEST;
         }
-        if (e.getClass() == ValidationExceptionForHandler.class) {
+        if (e.getClass() == ShareItValidationException.class) {
             status = HttpStatus.BAD_REQUEST;
         }
-        if (e.getClass() == NotFoundExceptionForHandler.class) {
+        if (e.getClass() == ShareItNotFoundException.class) {
             status = HttpStatus.NOT_FOUND;
         }
-        if (e.getClass() == ConflictExceptionForHandler.class) {
+        if (e.getClass() == ShareItConflictException.class) {
             status = HttpStatus.CONFLICT;
         }
 

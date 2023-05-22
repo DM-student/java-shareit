@@ -8,7 +8,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.data.Storage;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.utility.exceptions.NotFoundExceptionForHandler;
+import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
 
 import java.util.*;
 
@@ -36,7 +36,9 @@ public class ItemStorage implements Storage<Item> {
         try {
             jdbcTemplate.update(sqlQuery, ownerId, itemId);
         } catch (DuplicateKeyException e) {
-            // Nothing really.
+            // Это исключение должно и будет постоянно выскакивать, ибо там стоит условие unique,
+            // которое не даёт создать дубликат. За сим обработка его не требуется. Банально выскакивая - оно
+            // уже выполняет задачу по ограничению добавления дубликата.
         }
 
     }
@@ -63,7 +65,7 @@ public class ItemStorage implements Storage<Item> {
             log.info("Найден предмет в БД: id = {}, name = \"{}\"", newItem.getId(), newItem.getName());
             return newItem;
         } else {
-            throw new NotFoundExceptionForHandler("Предмет не найден.", "id#" + id);
+            throw new ShareItNotFoundException("Предмет не найден.", "id#" + id);
         }
     }
 
@@ -138,7 +140,7 @@ public class ItemStorage implements Storage<Item> {
     }
 
     @Override
-    public Item upload(Item obj) {
+    public Item create(Item obj) {
         String sqlQuery = "insert into items" +
                 "(id, name, name_for_searching, description, description_for_searching, available) " +
                 "values (?, ?, ?, ?, ?, ?)";
@@ -150,7 +152,6 @@ public class ItemStorage implements Storage<Item> {
         }
         lastId++;
         log.info("Загружен новый предмет в БД: id = {}, name = \"{}\"", obj.getId(), obj.getName());
-        log.warn("getTextForSearch(obj.getDescription()) = {}", getTextForSearch(obj.getDescription()));
         return obj;
     }
 
@@ -167,7 +168,6 @@ public class ItemStorage implements Storage<Item> {
             setItemOwner(obj.getOwnerId(), obj.getId());
         }
         log.info("Обновлён предмет в БД: id = {}, name = \"{}\"", obj.getId(), obj.getName());
-        log.warn("getTextForSearch(obj.getDescription()) = {}", getTextForSearch(obj.getDescription()));
         return obj;
     }
 
@@ -197,11 +197,6 @@ public class ItemStorage implements Storage<Item> {
         }
     }
 
-
-    @Override
-    public void specialAction(String[] args) {
-
-    }
 
     @Autowired
     public ItemStorage(JdbcTemplate jdbcTemplate) {

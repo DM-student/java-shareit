@@ -9,8 +9,8 @@ import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utility.JavaxValidationHandler;
-import ru.practicum.shareit.utility.exceptions.NotFoundExceptionForHandler;
-import ru.practicum.shareit.utility.exceptions.ValidationExceptionForHandler;
+import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
+import ru.practicum.shareit.utility.exceptions.ShareItValidationException;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,24 +34,24 @@ public class ItemService {
     }
 
     public List<ItemDto> getAll() {
-        return storage.getAll().stream().map(u -> mapper.mapToDto(u, true)).collect(Collectors.toList());
+        return storage.getAll().stream().map(item -> mapper.mapToDto(item, true)).collect(Collectors.toList());
     }
 
     public List<ItemDto> getAllForUser(Long id) {
         String[] args = new String[2];
         args[0] = "user";
         args[1] = id.toString();
-        return storage.specialGet(args).stream().map(u -> mapper.mapToDto(u, true)).collect(Collectors.toList());
+        return storage.specialGet(args).stream().map(item -> mapper.mapToDto(item, true)).collect(Collectors.toList());
     }
 
     public ItemDto upload(ItemDto item) {
         Item newItem = mapper.mapFromDto(item);
         if (!validation.validate(newItem)) {
-            throw new ValidationExceptionForHandler("Предмет не прошёл валидацию.",
+            throw new ShareItValidationException("Предмет не прошёл валидацию.",
                     validation.validateFull(newItem));
         }
         userStorage.get(item.getOwner().getId());
-        return mapper.mapToDto(storage.upload(newItem), true);
+        return mapper.mapToDto(storage.create(newItem), true);
     }
 
     public ItemDto update(ItemDto item) {
@@ -60,12 +60,12 @@ public class ItemService {
         oldItem.mergeFrom(newItem);
 
         if (!validation.validate(oldItem)) {
-            throw new ValidationExceptionForHandler("Предмет не прошёл валидацию.",
+            throw new ShareItValidationException("Предмет не прошёл валидацию.",
                     validation.validateFull(oldItem));
         }
 
         if (!Objects.equals(storage.get(item.getId()).getOwnerId(), item.getOwner().getId())) {
-            throw new NotFoundExceptionForHandler("При обновлении предмета указан новый пользователь.", item);
+            throw new ShareItNotFoundException("При обновлении предмета указан новый пользователь.", item);
         }
         return mapper.mapToDto(storage.update(oldItem), true);
     }

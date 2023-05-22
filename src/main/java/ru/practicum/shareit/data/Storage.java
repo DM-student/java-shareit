@@ -7,7 +7,7 @@ public interface Storage<T> {
 
     List<T> getAll();
 
-    T upload(T obj);
+    T create(T obj);
 
     T update(T obj);
 
@@ -16,6 +16,4 @@ public interface Storage<T> {
     // Это задел на будущее, например если нужно будет получить отсортированный список,
     // сделать специфичное действие или что-то в этом роде.
     List<T> specialGet(String[] args);
-
-    void specialAction(String[] args);
 }
