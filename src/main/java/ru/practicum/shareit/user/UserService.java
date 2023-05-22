@@ -54,7 +54,7 @@ public class UserService {
     }
 
     public UserDto delete(long id) {
-        for(long item : storage.get(id).getItemsIds()) {
+        for (long item : storage.get(id).getItemsIds()) {
             itemService.delete(item);
         }
         return mapper.mapToDto(storage.delete(id), true);
