@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.data.Storage;
@@ -12,6 +14,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utility.exceptions.ShareItConflictException;
 import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
 
+import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,8 +24,6 @@ public class UserStorage implements Storage<User> {
 
     private final Storage<Item> itemStorage;
     private final JdbcTemplate jdbcTemplate;
-
-    private long lastId = 0;
 
     private Set<Long> getUserItems(long userId) {
         Set<Long> items = new HashSet<>();
@@ -124,12 +125,21 @@ public class UserStorage implements Storage<User> {
         }
 
         String sqlQuery = "insert into users" +
-                "(id, name, email) " +
-                "values (?, ?, ?)";
-        obj.setId(lastId + 1);
-        jdbcTemplate.update(sqlQuery, obj.getId(), obj.getName(), obj.getEmail());
-        uploadUserItems(obj.getId(), obj.getItemsIds());
-        lastId++;
+                "(name, email) " +
+                "values (?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection
+                    .prepareStatement(sqlQuery, new String[]{"id"});
+            ps.setString(1, obj.getName());
+            ps.setString(2, obj.getEmail());
+            return ps;
+        }, keyHolder);
+
+        obj.setId((long) keyHolder.getKey());
+
         log.info("Загружен новый пользователь в БД: id = {}, email = \"{}\"", obj.getId(), obj.getEmail());
         return obj;
     }
@@ -142,13 +152,14 @@ public class UserStorage implements Storage<User> {
                         "электронной почты уже есть в БД.", "Предоставленный объект: " + obj);
             }
         }
-        get(obj.getId());
-
         String sqlQuery = "update users set " +
                 "name = ?, email = ?" +
                 "where id = ?";
-        jdbcTemplate.update(sqlQuery, obj.getName(),
+        int affectedRows = jdbcTemplate.update(sqlQuery, obj.getName(),
                 obj.getEmail(), obj.getId());
+        if (affectedRows == 0) {
+            throw new ShareItNotFoundException("Пользователь не найден.", "id#" + obj.getId());
+        }
         uploadUserItems(obj.getId(), obj.getItemsIds());
         log.info("Обновлён пользователь в БД: id = {}, email = \"{}\"", obj.getId(), obj.getName());
         return obj;
@@ -162,11 +173,11 @@ public class UserStorage implements Storage<User> {
             itemStorage.delete(item);
         }
 
-        User deletedItem = get(id);
+        User deletedUser = get(id);
         String sqlQuery = "delete from users where id = ?";
         jdbcTemplate.update(sqlQuery, id);
-        log.info("Удалён пользователь из БД: id = {}, name = \"{}\"", deletedItem.getId(), deletedItem.getEmail());
-        return deletedItem;
+        log.info("Удалён пользователь из БД: id = {}, name = \"{}\"", deletedUser.getId(), deletedUser.getEmail());
+        return deletedUser;
     }
 
     @Override

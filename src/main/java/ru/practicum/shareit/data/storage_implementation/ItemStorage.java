@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.data.Storage;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
 
+import java.sql.PreparedStatement;
 import java.util.*;
 
 @Slf4j
@@ -18,15 +21,16 @@ public class ItemStorage implements Storage<Item> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private long lastId = 0;
-
     private Long getItemOwnerId(long itemId) {
         SqlRowSet sqlRows = jdbcTemplate.queryForRowSet("select user_id from " +
                 "users_to_items where item_id = ?", itemId);
         if (sqlRows.next()) {
             return sqlRows.getLong("user_id");
         }
-        return null;
+        delete(itemId); // Удаляем бесхозный предмет
+        throw new NullPointerException("Владелец для Item#" + itemId + " не найден в базе данных.");
+        // Вообще, по-хорошему, предмет не должен быть бесхозным, но если такое случится - он будет удалён,
+        // а после последует выброс исключения.
     }
 
     private void setItemOwner(long ownerId, long itemId) {
@@ -142,28 +146,42 @@ public class ItemStorage implements Storage<Item> {
     @Override
     public Item create(Item obj) {
         String sqlQuery = "insert into items" +
-                "(id, name, name_for_searching, description, description_for_searching, available) " +
-                "values (?, ?, ?, ?, ?, ?)";
-        obj.setId(lastId + 1);
-        jdbcTemplate.update(sqlQuery, obj.getId(), obj.getName(), getTextForSearch(obj.getName()),
-                obj.getDescription(), getTextForSearch(obj.getDescription()), obj.getAvailable());
+                "(name, name_for_searching, description, description_for_searching, available) " +
+                "values (?, ?, ?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection
+                    .prepareStatement(sqlQuery, new String[]{"id"});
+            ps.setString(1, obj.getName());
+            ps.setString(2, getTextForSearch(obj.getName()));
+            ps.setString(3, obj.getDescription());
+            ps.setString(4, getTextForSearch(obj.getDescription()));
+            ps.setBoolean(5, obj.getAvailable());
+            return ps;
+        }, keyHolder);
+
+        obj.setId((long) keyHolder.getKey());
+
         if (obj.getOwnerId() != null) {
             setItemOwner(obj.getOwnerId(), obj.getId());
         }
-        lastId++;
+
         log.info("Загружен новый предмет в БД: id = {}, name = \"{}\"", obj.getId(), obj.getName());
         return obj;
     }
 
     @Override
     public Item update(Item obj) {
-        get(obj.getId());
-
         String sqlQuery = "update items set " +
                 "name = ?, name_for_searching = ?, description = ?, description_for_searching = ?, available = ? " +
                 "where id = ?";
-        jdbcTemplate.update(sqlQuery, obj.getName(), getTextForSearch(obj.getName()),
+        int affectedRows = jdbcTemplate.update(sqlQuery, obj.getName(), getTextForSearch(obj.getName()),
                 obj.getDescription(), getTextForSearch(obj.getDescription()), obj.getAvailable(), obj.getId());
+        if (affectedRows == 0) {
+            throw new ShareItNotFoundException("Предмет не найден.", "id#" + obj.getId());
+        }
         if (obj.getOwnerId() != null) {
             setItemOwner(obj.getOwnerId(), obj.getId());
         }
