@@ -6,16 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.data.Storage;
+import ru.practicum.shareit.data.UserDataBaseStorage;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoMapper;
-import ru.practicum.shareit.user.model.User;
 
 @Component
 public class ItemDtoMapper implements ApplicationContextAware, InitializingBean {
     @Autowired
-    Storage<User> userStorage;
+    UserDataBaseStorage userStorage;
 
     UserDtoMapper userMapper;
 
@@ -23,7 +22,7 @@ public class ItemDtoMapper implements ApplicationContextAware, InitializingBean 
         ItemDto itemDto = new ItemDto(item.getId(), null, item.getName(),
                 item.getDescription(), item.getAvailable(), fullData);
         if (fullData && item.getOwnerId() != null) {
-            UserDto user = userMapper.mapToDto(userStorage.get(item.getOwnerId()), false);
+            UserDto user = userMapper.mapToDto(userStorage.findById(item.getOwnerId()).get(), false);
             itemDto.setOwner(user);
         }
         return itemDto;
