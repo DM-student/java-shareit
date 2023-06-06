@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "items")
+@Table(name = "users")
 @NoArgsConstructor
 @Data
 public class User {
@@ -29,11 +29,17 @@ public class User {
     @Size(max = 32, message = "Имя слишком длинное!")
     private String name;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     @NotBlank(message = "Адрес почты пуст!")
     @Email(message = "Адрес почты указан неверно!")
     @Size(max = 320, message = "Адрес почты слишком длинный!")
     private String email;
+
+    public User getClearCopy() {
+        User user = new User(id, name, email);
+        user.itemsIds = this.itemsIds;
+        return user;
+    }
 
     public User(Long id, String name, String email) {
         this.id = id;

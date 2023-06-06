@@ -9,41 +9,22 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @Entity
 @NoArgsConstructor
-@Table(name = "users", schema = "public")
+@Table(name = "items")
+@SecondaryTable(name = "users_to_items", pkJoinColumns = @PrimaryKeyJoinColumn(name = "item_id"))
 public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-
+    @Column(table = "users_to_items", name = "user_id")
     private Long ownerId;
-
-    @ElementCollection
-    @CollectionTable(name="users_to_items", joinColumns=@JoinColumn(name="user_id"))
-    @Column(name="user_id")
-    private void sqlSetOwnerId(List<Long> ownerIds) {
-        if (ownerIds == null) {
-            return;
-        }
-        if (ownerIds.isEmpty()) {
-            return;
-        }
-        ownerId = ownerIds.get(0);
-    }
-
-    @ElementCollection
-    @CollectionTable(name="users_to_items", joinColumns=@JoinColumn(name="user_id"))
-    @Column(name="user_id")
-    private List<Long> sqlUploadOwnerId() {
-        return List.of(ownerId);
-    }
 
     @Column(name = "name")
     @NotBlank(message = "Название пустое!")
@@ -59,7 +40,11 @@ public class Item {
     @NotNull(message = "Параметр доступности обязан присутствовать!")
     private Boolean available;
 
-    // Булево значение "request" я добавлю когда буду работать над add-item-requests.
+    // Хибернейт делает свои особые классы для объектов, из-за чего некоторые штуки ломаются.
+    public Item getClearCopy() {
+        return new Item(id, ownerId, name, description, available);
+    }
+
 
     public void mergeFrom(Item otherItem) {
         if (otherItem.id != null) {

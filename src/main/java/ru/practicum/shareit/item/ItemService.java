@@ -3,19 +3,26 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.data.CommentDataBaseStorage;
 import ru.practicum.shareit.data.ItemDataBaseStorage;
 import ru.practicum.shareit.data.UserDataBaseStorage;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentDtoMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utility.JavaxValidationHandler;
 import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
+import ru.practicum.shareit.utility.exceptions.ShareItProvidedDataException;
 import ru.practicum.shareit.utility.exceptions.ShareItValidationException;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,20 +36,21 @@ public class ItemService {
     private UserDataBaseStorage userStorage;
     @Autowired
     private ItemDtoMapper mapper;
+    @Autowired
+    private CommentDataBaseStorage commentStorage;
+    @Autowired
+    private CommentDtoMapper commentMapper;
 
-    public ItemDto get(long id) {
-        Item item;
-        try {
-            item = storage.getById(id);
-        }
-        catch (EntityNotFoundException e) {
+    public ItemDto get(long id, Long userId) {
+        Optional<Item> itemOptional = storage.findById(id);
+        if(itemOptional.isEmpty()) {
             throw new ShareItNotFoundException("Предмет не найден.", "item.id = " + id);
         }
-        return mapper.mapToDto(item, true);
+        return mapper.mapToDto(itemOptional.get(), true, userId);
     }
 
-    public List<ItemDto> getAll() {
-        return storage.findAll().stream().map(item -> mapper.mapToDto(item, true)).collect(Collectors.toList());
+    public List<ItemDto> getAll(Long userId) {
+        return storage.findAll().stream().map(item -> mapper.mapToDto(item, true, userId)).collect(Collectors.toList());
     }
 
     public List<ItemDto> getAllForUser(Long id) {
@@ -50,7 +58,7 @@ public class ItemService {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + id);
         }
         return storage.findAll().stream().filter(item -> Objects.equals(item.getOwnerId(), id))
-                .map(item -> mapper.mapToDto(item, true)).collect(Collectors.toList());
+                .map(item -> mapper.mapToDto(item, true, id)).collect(Collectors.toList());
     }
 
     public ItemDto upload(ItemDto item) {
@@ -71,7 +79,7 @@ public class ItemService {
         Item itemToUpdate;
 
         try {
-            itemToUpdate = storage.getById(newItem.getId());
+            itemToUpdate = storage.getById(newItem.getId()).getClearCopy();
         }
         catch (EntityNotFoundException e) {
             throw new ShareItNotFoundException("Предмет не найден.", item);
@@ -91,13 +99,43 @@ public class ItemService {
     }
 
     public ItemDto delete(long id) {
-        ItemDto deletedItem = get(id);
+        ItemDto deletedItem = get(id, null);
         storage.deleteById(id);
         return deletedItem;
     }
 
+    // Я так и не понял, нужен ли мне поиск не доступных штук.
     public List<ItemDto> getSearched(String query) {
-        return storage.findAll().stream().filter(item -> item.getName().toLowerCase().equals(query.toLowerCase()))
-                .map(item -> mapper.mapToDto(item, true)).collect(Collectors.toList());
+        return storage.findAll().stream().filter(item -> {
+                    if (item.getName().toLowerCase().contains(query.toLowerCase())) { return true; }
+                    return item.getDescription().toLowerCase().contains(query.toLowerCase());
+                }).map(item -> mapper.mapToDto(item, true))
+                .collect(Collectors.toList());
+    }
+    public List<ItemDto> getSearchedAvailable(String query) {
+        return storage.findAll().stream().filter(item -> {
+                    if (item.getName().toLowerCase().contains(query.toLowerCase())) {
+                        return item.getAvailable();
+                    }
+                    if (item.getDescription().toLowerCase().contains(query.toLowerCase())) {
+                        return item.getAvailable();
+                    }
+                    return false;
+                }).map(item -> mapper.mapToDto(item, true))
+                .collect(Collectors.toList());
+    }
+
+    public CommentDto postComment(Comment comment) {
+        if(!validation.validate(comment)) {
+            throw new ShareItValidationException("Комментарий не прошёл валидацию.", validation.validateFull(comment));
+        }
+        if(!userStorage.existsById(comment.getUserId())) {
+            throw new ShareItProvidedDataException("Пользователь не найден.", comment);
+        }
+        if(!storage.existsById(comment.getItemId())) {
+            throw new ShareItProvidedDataException("Предмет не найден.", comment);
+        }
+        comment.setCreated(LocalDateTime.now());
+        return commentMapper.mapToDto(commentStorage.save(comment));
     }
 }

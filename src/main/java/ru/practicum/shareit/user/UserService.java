@@ -8,11 +8,13 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utility.JavaxValidationHandler;
+import ru.practicum.shareit.utility.exceptions.ShareItConflictException;
 import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
 import ru.practicum.shareit.utility.exceptions.ShareItValidationException;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,14 +29,12 @@ public class UserService {
     private UserDtoMapper mapper;
 
     public UserDto get(long id) {
-        User user;
-        try {
-            user = storage.getById(id);
-        }
-        catch (EntityNotFoundException e) {
+        Optional<User> userOptional = storage.findById(id);
+
+        if(userOptional.isEmpty()) {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + id);
         }
-        return mapper.mapToDto(user, true);
+        return mapper.mapToDto(userOptional.get(), true);
     }
 
     public List<UserDto> getAll() {
@@ -56,7 +56,7 @@ public class UserService {
         User userToUpdate;
 
         try {
-            userToUpdate = storage.getById(newUser.getId());
+            userToUpdate = storage.getById(newUser.getId()).getClearCopy();
         }
         catch (EntityNotFoundException e) {
             throw new ShareItNotFoundException("Пользователь не найден.", user);
@@ -66,7 +66,10 @@ public class UserService {
 
         if (!validation.validate(userToUpdate)) {
             throw new ShareItValidationException("Пользователь не прошёл валидацию.",
-                    validation.validateFull(userToUpdate));
+                    validation.validateFull(userToUpdate).toString() + "\"data\":" + userToUpdate);
+        }
+        if(storage.findOtherUserWithSameEmail(userToUpdate.getEmail(), userToUpdate.getId()) != null) {
+            throw new ShareItConflictException("Пользователь с таким адресом электронной почты уже есть.", userToUpdate);
         }
         return mapper.mapToDto(storage.save(userToUpdate), true);
     }
