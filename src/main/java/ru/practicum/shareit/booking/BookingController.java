@@ -14,16 +14,19 @@ import java.util.Optional;
 public class BookingController {
     @Autowired
     BookingService service;
+
     @GetMapping
     public List<BookingDto> getAll(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                                    @RequestParam Optional<String> state) {
         return service.getAll(state, userId);
     }
+
     @GetMapping("/owner")
     public List<BookingDto> getAllForOwner(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                                            @RequestParam Optional<String> state) {
         return service.getAllForOwner(userId, state, userId);
     }
+
     @PostMapping
     public BookingDto post(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                            @RequestBody BookingDto bookingDto) {
@@ -42,11 +45,10 @@ public class BookingController {
         BookingDto bookingDto = bookingDtoOptional.orElseGet(BookingDto::new);
         bookingDto.setStatus(null); // Чтобы не меняли иными методами.
         bookingDto.setId(id);
-        if(approved.isPresent()) {
-            if(approved.get()) {
+        if (approved.isPresent()) {
+            if (approved.get()) {
                 bookingDto.setStatus(BookingState.APPROVED);
-            }
-            else {
+            } else {
                 bookingDto.setStatus(BookingState.REJECTED);
             }
         }
@@ -54,7 +56,7 @@ public class BookingController {
     }
 
     @GetMapping("/{id}")
-    public BookingDto getAll(@RequestHeader(name = "X-Sharer-User-Id") Long userId, @PathVariable long id){
+    public BookingDto getAll(@RequestHeader(name = "X-Sharer-User-Id") Long userId, @PathVariable long id) {
         return service.getById(id, userId);
     }
 }

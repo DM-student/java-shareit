@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.dto;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -21,6 +20,7 @@ public class BookingDtoMapper implements ApplicationContextAware, InitializingBe
     ItemDataBaseStorage itemStorage;
     UserDtoMapper userMapper;
     ItemDtoMapper itemMapper;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         userMapper = context.getBean(UserDtoMapper.class);
@@ -37,21 +37,21 @@ public class BookingDtoMapper implements ApplicationContextAware, InitializingBe
 
     public BookingDto mapToDto(Booking booking, boolean fullData) {
         itemMapper = context.getBean(ItemDtoMapper.class);
-        BookingDto newBooking = new BookingDto(booking.getId(),null, null, booking.getStart(), booking.getEnd(),
+        BookingDto newBooking = new BookingDto(booking.getId(), null, null, booking.getStart(), booking.getEnd(),
                 booking.getState(), null, null, true);
 
 
-        if(booking.getUserId() != null) {
+        if (booking.getUserId() != null) {
             UserDto user = userMapper.mapToDto(userStorage.findById(booking.getUserId()).get(), false);
             newBooking.setBookerId(user.getId());
-            if(fullData) {
+            if (fullData) {
                 newBooking.setBooker(user);
             }
         }
-        if(booking.getUserId() != null) {
+        if (booking.getUserId() != null) {
             ItemDto item = itemMapper.mapToDto(itemStorage.findById(booking.getItemId()).get(), false);
             newBooking.setItemId(item.getId());
-            if(fullData) {
+            if (fullData) {
                 newBooking.setItem(item);
             }
         }
@@ -61,13 +61,12 @@ public class BookingDtoMapper implements ApplicationContextAware, InitializingBe
     public Booking mapFromDto(BookingDto booking) {
         Booking newBooking = new Booking(booking.getId(), null, null,
                 booking.getStatus(), booking.getStart(), booking.getEnd());
-        if(booking.getBooker() != null) {
+        if (booking.getBooker() != null) {
             newBooking.setUserId(booking.getBooker().getId());
         }
-        if(booking.getItem() != null) {
+        if (booking.getItem() != null) {
             newBooking.setItemId(booking.getItem().getId());
-        }
-        else  {
+        } else {
             newBooking.setItemId(booking.getItemId());
         }
         return newBooking;

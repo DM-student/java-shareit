@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -44,22 +43,22 @@ public class Booking {
     }
 
     public void mergeFrom(Booking otherBooking) {
-        if(otherBooking.id != null) {
+        if (otherBooking.id != null) {
             id = otherBooking.id;
         }
-        if(otherBooking.userId != null) {
+        if (otherBooking.userId != null) {
             userId = otherBooking.userId;
         }
-        if(otherBooking.itemId != null) {
+        if (otherBooking.itemId != null) {
             itemId = otherBooking.itemId;
         }
-        if(otherBooking.state != null) {
+        if (otherBooking.state != null) {
             state = otherBooking.state;
         }
-        if(otherBooking.start != null) {
+        if (otherBooking.start != null) {
             start = otherBooking.start;
         }
-        if(otherBooking.end != null) {
+        if (otherBooking.end != null) {
             end = otherBooking.end;
         }
     }

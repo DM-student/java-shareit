@@ -12,7 +12,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utility.JavaxValidationHandler;
 import ru.practicum.shareit.utility.exceptions.ShareItNotFoundException;
 import ru.practicum.shareit.utility.exceptions.ShareItProvidedDataException;
@@ -43,7 +42,7 @@ public class ItemService {
 
     public ItemDto get(long id, Long userId) {
         Optional<Item> itemOptional = storage.findById(id);
-        if(itemOptional.isEmpty()) {
+        if (itemOptional.isEmpty()) {
             throw new ShareItNotFoundException("Предмет не найден.", "item.id = " + id);
         }
         return mapper.mapToDto(itemOptional.get(), true, userId);
@@ -54,7 +53,7 @@ public class ItemService {
     }
 
     public List<ItemDto> getAllForUser(Long id) {
-        if(!userStorage.existsById(id)) {
+        if (!userStorage.existsById(id)) {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + id);
         }
         return storage.findAll().stream().filter(item -> Objects.equals(item.getOwnerId(), id))
@@ -67,7 +66,7 @@ public class ItemService {
             throw new ShareItValidationException("Предмет не прошёл валидацию.",
                     validation.validateFull(newItem));
         }
-        if(userStorage.findById(newItem.getOwnerId()).isEmpty()) {
+        if (userStorage.findById(newItem.getOwnerId()).isEmpty()) {
             throw new ShareItNotFoundException("Был указан несуществующий владелец.", newItem);
         }
         item.setId(null);
@@ -80,8 +79,7 @@ public class ItemService {
 
         try {
             itemToUpdate = storage.getById(newItem.getId()).getClearCopy();
-        }
-        catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             throw new ShareItNotFoundException("Предмет не найден.", item);
         }
         long oldOwnerId = itemToUpdate.getOwnerId();
@@ -107,11 +105,14 @@ public class ItemService {
     // Я так и не понял, нужен ли мне поиск не доступных штук.
     public List<ItemDto> getSearched(String query) {
         return storage.findAll().stream().filter(item -> {
-                    if (item.getName().toLowerCase().contains(query.toLowerCase())) { return true; }
+                    if (item.getName().toLowerCase().contains(query.toLowerCase())) {
+                        return true;
+                    }
                     return item.getDescription().toLowerCase().contains(query.toLowerCase());
                 }).map(item -> mapper.mapToDto(item, true))
                 .collect(Collectors.toList());
     }
+
     public List<ItemDto> getSearchedAvailable(String query) {
         return storage.findAll().stream().filter(item -> {
                     if (item.getName().toLowerCase().contains(query.toLowerCase())) {
@@ -126,13 +127,13 @@ public class ItemService {
     }
 
     public CommentDto postComment(Comment comment) {
-        if(!validation.validate(comment)) {
+        if (!validation.validate(comment)) {
             throw new ShareItValidationException("Комментарий не прошёл валидацию.", validation.validateFull(comment));
         }
-        if(!userStorage.existsById(comment.getUserId())) {
+        if (!userStorage.existsById(comment.getUserId())) {
             throw new ShareItProvidedDataException("Пользователь не найден.", comment);
         }
-        if(!storage.existsById(comment.getItemId())) {
+        if (!storage.existsById(comment.getItemId())) {
             throw new ShareItProvidedDataException("Предмет не найден.", comment);
         }
         comment.setCreated(LocalDateTime.now());

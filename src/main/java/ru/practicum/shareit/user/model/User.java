@@ -20,8 +20,8 @@ public class User {
     private Long id;
 
     @ElementCollection
-    @CollectionTable(name="users_to_items", joinColumns=@JoinColumn(name="user_id"))
-    @Column(name="item_id")
+    @CollectionTable(name = "users_to_items", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "item_id")
     private Set<Long> itemsIds = new HashSet<>();
 
     @Column(name = "name")

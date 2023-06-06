@@ -31,7 +31,7 @@ public class UserService {
     public UserDto get(long id) {
         Optional<User> userOptional = storage.findById(id);
 
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + id);
         }
         return mapper.mapToDto(userOptional.get(), true);
@@ -57,8 +57,7 @@ public class UserService {
 
         try {
             userToUpdate = storage.getById(newUser.getId()).getClearCopy();
-        }
-        catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             throw new ShareItNotFoundException("Пользователь не найден.", user);
         }
         long oldId = userToUpdate.getId();
@@ -68,7 +67,7 @@ public class UserService {
             throw new ShareItValidationException("Пользователь не прошёл валидацию.",
                     validation.validateFull(userToUpdate).toString() + "\"data\":" + userToUpdate);
         }
-        if(storage.findOtherUserWithSameEmail(userToUpdate.getEmail(), userToUpdate.getId()) != null) {
+        if (storage.findOtherUserWithSameEmail(userToUpdate.getEmail(), userToUpdate.getId()) != null) {
             throw new ShareItConflictException("Пользователь с таким адресом электронной почты уже есть.", userToUpdate);
         }
         return mapper.mapToDto(storage.save(userToUpdate), true);

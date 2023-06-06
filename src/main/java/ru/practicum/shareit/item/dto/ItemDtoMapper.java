@@ -34,7 +34,7 @@ public class ItemDtoMapper implements ApplicationContextAware, InitializingBean 
         ItemDto itemDto = new ItemDto(item.getId(), null, item.getName(),
                 item.getDescription(), item.getAvailable(), null, null, null, fullData);
         if (fullData) {
-            if(item.getOwnerId() != null) {
+            if (item.getOwnerId() != null) {
                 UserDto user = userMapper.mapToDto(userStorage.findById(item.getOwnerId()).get(), false);
                 itemDto.setOwner(user);
             }
@@ -50,32 +50,32 @@ public class ItemDtoMapper implements ApplicationContextAware, InitializingBean 
 
     public ItemDto mapToDto(Item item, boolean fullData, Long userId) {
         ItemDto itemDto = mapToDto(item, fullData);
-        if(userId == null) {
+        if (userId == null) {
             return itemDto;
         }
 
-        if(userId.equals(item.getOwnerId())) {
-            for(Booking booking : bookingStorage.getBookingsSortedByDate()) {
-                if(booking.getStart().isAfter(LocalDateTime.now())) {
+        if (userId.equals(item.getOwnerId())) {
+            for (Booking booking : bookingStorage.getBookingsSortedByDate()) {
+                if (booking.getStart().isAfter(LocalDateTime.now())) {
                     itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
                 }
             }
-            for(Booking booking : bookingStorage.getBookingsSortedByDateReverse()) {
-                if(booking.getStart().isBefore(LocalDateTime.now())) {
+            for (Booking booking : bookingStorage.getBookingsSortedByDateReverse()) {
+                if (booking.getStart().isBefore(LocalDateTime.now())) {
                     itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
                 }
             }
             return itemDto;
         }
 
-        for(Booking booking : bookingStorage.getBookingsByUserIdSortedByDate(userId)) {
-            if(booking.getStart().isAfter(LocalDateTime.now())) {
+        for (Booking booking : bookingStorage.getBookingsByUserIdSortedByDate(userId)) {
+            if (booking.getStart().isAfter(LocalDateTime.now())) {
                 itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
             }
         }
 
-        for(Booking booking : bookingStorage.getBookingsByUserIdSortedByDateReverse(userId)) {
-            if(booking.getStart().isBefore(LocalDateTime.now())) {
+        for (Booking booking : bookingStorage.getBookingsByUserIdSortedByDateReverse(userId)) {
+            if (booking.getStart().isBefore(LocalDateTime.now())) {
                 itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
             }
         }
