@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.data.BookingDataBaseStorage;
 import ru.practicum.shareit.data.CommentDataBaseStorage;
 import ru.practicum.shareit.data.UserDataBaseStorage;
@@ -28,6 +29,7 @@ public class ItemDtoMapper implements ApplicationContextAware, InitializingBean 
     UserDtoMapper userMapper;
 
     public ItemDto mapToDto(Item item, boolean fullData) {
+        // Так надо, ибо рекурсивные зависимости...
         commentStorage = context.getBean(CommentDataBaseStorage.class);
         bookingMapper = context.getBean(BookingDtoMapper.class);
 
@@ -56,30 +58,38 @@ public class ItemDtoMapper implements ApplicationContextAware, InitializingBean 
 
         if (userId.equals(item.getOwnerId())) {
             for (Booking booking : bookingStorage.getBookingsSortedByDate()) {
-                if (booking.getStart().isAfter(LocalDateTime.now())) {
+                if (booking.getItemId().equals(item.getId()) &&
+                        booking.getStart().isAfter(LocalDateTime.now()) &&
+                        booking.getState() != BookingState.REJECTED) {
                     itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
+                    break;
                 }
             }
             for (Booking booking : bookingStorage.getBookingsSortedByDateReverse()) {
-                if (booking.getStart().isBefore(LocalDateTime.now())) {
-                    itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
+                if (booking.getItemId().equals(item.getId()) &&
+                        booking.getStart().isBefore(LocalDateTime.now()) &&
+                        booking.getState() != BookingState.REJECTED) {
+                    itemDto.setLastBooking(bookingMapper.mapToDto(booking, false));
+                    break;
                 }
             }
             return itemDto;
         }
-
+        /*
         for (Booking booking : bookingStorage.getBookingsByUserIdSortedByDate(userId)) {
             if (booking.getStart().isAfter(LocalDateTime.now())) {
                 itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
+                break;
             }
         }
 
         for (Booking booking : bookingStorage.getBookingsByUserIdSortedByDateReverse(userId)) {
             if (booking.getStart().isBefore(LocalDateTime.now())) {
-                itemDto.setNextBooking(bookingMapper.mapToDto(booking, false));
+                itemDto.setLastBooking(bookingMapper.mapToDto(booking, false));
+                break;
             }
         }
-
+        */
         return itemDto;
     }
 

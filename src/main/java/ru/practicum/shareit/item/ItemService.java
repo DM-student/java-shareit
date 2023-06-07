@@ -3,6 +3,8 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.data.BookingDataBaseStorage;
 import ru.practicum.shareit.data.CommentDataBaseStorage;
 import ru.practicum.shareit.data.ItemDataBaseStorage;
 import ru.practicum.shareit.data.UserDataBaseStorage;
@@ -39,6 +41,8 @@ public class ItemService {
     private CommentDataBaseStorage commentStorage;
     @Autowired
     private CommentDtoMapper commentMapper;
+    @Autowired
+    private BookingDataBaseStorage bookingStorage;
 
     public ItemDto get(long id, Long userId) {
         Optional<Item> itemOptional = storage.findById(id);
@@ -127,6 +131,7 @@ public class ItemService {
     }
 
     public CommentDto postComment(Comment comment) {
+        comment.setCreated(LocalDateTime.now());
         if (!validation.validate(comment)) {
             throw new ShareItValidationException("Комментарий не прошёл валидацию.", validation.validateFull(comment));
         }
@@ -136,7 +141,12 @@ public class ItemService {
         if (!storage.existsById(comment.getItemId())) {
             throw new ShareItProvidedDataException("Предмет не найден.", comment);
         }
-        comment.setCreated(LocalDateTime.now());
+        if (bookingStorage.getBookingsByUserIdSortedByDate(comment.getUserId()).stream()
+                .noneMatch(booking -> Objects.equals(booking.getItemId(), comment.getItemId()) &&
+                        booking.getState() == BookingState.APPROVED &&
+                        booking.getStart().isBefore(LocalDateTime.now()))) {
+            throw new ShareItProvidedDataException("Пользователь не брал предмет в аренду.", comment);
+        }
         return commentMapper.mapToDto(commentStorage.save(comment));
     }
 }

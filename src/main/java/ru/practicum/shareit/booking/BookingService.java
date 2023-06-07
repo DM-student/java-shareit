@@ -19,7 +19,6 @@ import ru.practicum.shareit.utility.exceptions.ShareItProvidedDataException;
 import ru.practicum.shareit.utility.exceptions.ShareItValidationException;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,9 +75,12 @@ public class BookingService implements ApplicationContextAware, InitializingBean
     }
 
     public List<BookingDto> getAll(Optional<String> state, long userId) {
-        List<BookingDto> out = bookingStorage.findAll().stream()
-                .filter(booking -> isItOwnerOrBooker(booking.getId(), userId))
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
+        if (!userStorage.existsById(userId)) {
+            throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + userId);
+        }
+
+        List<BookingDto> out = bookingStorage.getBookingsSortedByDateReverse().stream()
+                .filter(booking -> booking.getUserId() == userId)
                 .map(booking -> bookingMapper.mapToDto(booking, true))
                 .collect(Collectors.toList());
         if (state.isEmpty() || state.get().equals("ALL")) {
@@ -105,9 +107,12 @@ public class BookingService implements ApplicationContextAware, InitializingBean
     }
 
     public List<BookingDto> getAllForOwner(long owner, Optional<String> state, long userId) {
-        List<BookingDto> out = bookingStorage.findAll().stream()
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
-                .filter(booking -> isItOwnerOrBooker(booking.getId(), userId))
+        if (!userStorage.existsById(userId)) {
+            throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + userId);
+        }
+
+        List<BookingDto> out = bookingStorage.getBookingsSortedByDateReverse().stream()
+                .filter(booking -> isItOwner(booking.getId(), userId))
                 .filter(booking -> itemStorage.getById(booking.getItemId()).getOwnerId() == owner)
                 .map(booking -> bookingMapper.mapToDto(booking, true))
                 .collect(Collectors.toList());
@@ -153,11 +158,15 @@ public class BookingService implements ApplicationContextAware, InitializingBean
     }
 
     public BookingDto getById(long id, long userId) {
+        if (!userStorage.existsById(userId)) {
+            throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + userId);
+        }
+
         Optional<Booking> bookingOptional = bookingStorage.findById(id);
         if (bookingOptional.isEmpty()) {
             throw new ShareItNotFoundException("Букинг не найден.", id);
         }
-        if (!isItOwnerOrBooker(id, userId)) {
+        if (!isItOwner(id, userId)) {
             throw new ShareItNotFoundException("Данный объект не найден среди доступных " +
                     "для предоставленного пользователя.", id);
         }
@@ -187,7 +196,7 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         }
     }
 
-    private boolean isItOwnerOrBooker(long bookingId, long userId) {
+    private boolean isItOwner(long bookingId, long userId) {
         if (!userStorage.existsById(userId)) {
             throw new ShareItNotFoundException("Пользователь не найден.", userId);
         }
