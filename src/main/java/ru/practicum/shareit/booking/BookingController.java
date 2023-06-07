@@ -40,7 +40,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}")
-    public BookingDto patch(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+    public BookingDto update(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                             @RequestBody Optional<BookingDto> bookingDtoOptional,
                             @Positive @PathVariable Long id,
                             @RequestParam Optional<Boolean> approved) {
