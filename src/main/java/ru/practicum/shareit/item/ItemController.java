@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,12 +18,12 @@ public class ItemController {
     private ItemService itemService;
 
     @GetMapping("/{id}")
-    public ItemDto get(@PathVariable Long id, @RequestHeader(name = "X-Sharer-User-Id") Optional<Long> userId) {
+    public ItemDto get(@Positive @PathVariable Long id, @RequestHeader(name = "X-Sharer-User-Id") Optional<Long> userId) {
         return itemService.get(id, userId.get());
     }
 
     @GetMapping
-    public List<ItemDto> getAll(@RequestHeader(name = "X-Sharer-User-Id") Optional<Long> ownerId) {
+    public List<ItemDto> getAll(@Positive @RequestHeader(name = "X-Sharer-User-Id") Optional<Long> ownerId) {
         if (ownerId.isPresent()) {
             return itemService.getAllForUser(ownerId.get());
         }
@@ -30,13 +31,13 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto upload(@RequestBody ItemDto item, @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
+    public ItemDto upload(@RequestBody ItemDto item, @Positive @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
         item.setOwner(new UserDto(ownerId, null, null, false));
         return itemService.upload(item);
     }
 
     @PatchMapping("/{id}")
-    public ItemDto update(@PathVariable long id, @RequestBody ItemDto item,
+    public ItemDto update(@Positive @PathVariable long id, @RequestBody ItemDto item,
                           @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
         if (ownerId != null) {
             item.setOwner(new UserDto(ownerId, null, null, false));
@@ -46,7 +47,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ItemDto delete(@PathVariable long id) {
+    public ItemDto delete(@Positive @PathVariable long id) {
         return itemService.delete(id);
     }
 
@@ -63,7 +64,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto getComments(@PathVariable long itemId, @RequestBody CommentDto commentDto,
+    public CommentDto getComments(@Positive @PathVariable long itemId, @RequestBody CommentDto commentDto,
                                   @RequestHeader(name = "X-Sharer-User-Id") Long userId) {
         Comment comment = new Comment();
         comment.setItemId(itemId);

@@ -16,10 +16,10 @@ import ru.practicum.shareit.user.dto.UserDtoMapper;
 
 @Component
 public class BookingDtoMapper implements ApplicationContextAware, InitializingBean {
-    UserDataBaseStorage userStorage;
-    ItemDataBaseStorage itemStorage;
-    UserDtoMapper userMapper;
-    ItemDtoMapper itemMapper;
+    private UserDataBaseStorage userStorage;
+    private ItemDataBaseStorage itemStorage;
+    private UserDtoMapper userMapper;
+    private ItemDtoMapper itemMapper;
 
     @Override
     public void afterPropertiesSet() throws Exception {

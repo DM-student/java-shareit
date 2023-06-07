@@ -26,11 +26,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class BookingService implements ApplicationContextAware, InitializingBean {
-    BookingDataBaseStorage bookingStorage;
-    ItemDataBaseStorage itemStorage;
-    UserDataBaseStorage userStorage;
-    JavaxValidationHandler validation;
-    BookingDtoMapper bookingMapper;
+    private BookingDataBaseStorage bookingStorage;
+    private ItemDataBaseStorage itemStorage;
+    private UserDataBaseStorage userStorage;
+    private JavaxValidationHandler validation;
+    private BookingDtoMapper bookingMapper;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -53,8 +53,8 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         Booking booking = bookingMapper.mapFromDto(newBooking);
         booking.setId(null);
         validateInService(booking);
-        Booking output = bookingStorage.save(booking);
-        return bookingMapper.mapToDto(output, true);
+        Booking postedBooking = bookingStorage.save(booking);
+        return bookingMapper.mapToDto(postedBooking, true);
     }
 
     public BookingDto update(BookingDto newBooking, Long updatingUser) {
@@ -74,7 +74,7 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         return bookingMapper.mapToDto(bookingStorage.save(bookingToUpdate), true);
     }
 
-    public List<BookingDto> getAll(Optional<String> state, long userId) {
+    public List<BookingDto> getAll(String state, long userId) {
         if (!userStorage.existsById(userId)) {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + userId);
         }
@@ -83,10 +83,10 @@ public class BookingService implements ApplicationContextAware, InitializingBean
                 .filter(booking -> booking.getUserId() == userId)
                 .map(booking -> bookingMapper.mapToDto(booking, true))
                 .collect(Collectors.toList());
-        if (state.isEmpty() || state.get().equals("ALL")) {
-            return out;
-        }
-        switch (state.get()) {
+
+        switch (state) {
+            case "ALL":
+                return out;
             case "FUTURE":
                 return out.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now())).collect(Collectors.toList());
             case "PAST":
@@ -106,7 +106,7 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         }
     }
 
-    public List<BookingDto> getAllForOwner(long owner, Optional<String> state, long userId) {
+    public List<BookingDto> getAllForOwner(long owner, String state, long userId) {
         if (!userStorage.existsById(userId)) {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + userId);
         }
@@ -116,10 +116,10 @@ public class BookingService implements ApplicationContextAware, InitializingBean
                 .filter(booking -> itemStorage.getById(booking.getItemId()).getOwnerId() == owner)
                 .map(booking -> bookingMapper.mapToDto(booking, true))
                 .collect(Collectors.toList());
-        if (state.isEmpty() || state.get().equals("ALL")) {
-            return out;
-        }
-        switch (state.get()) {
+
+        switch (state) {
+            case "ALL":
+                return out;
             case "FUTURE":
                 return out.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now())).collect(Collectors.toList());
             case "PAST":

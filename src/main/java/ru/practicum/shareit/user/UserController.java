@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
@@ -13,7 +14,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/{id}")
-    public UserDto get(@PathVariable Long id) {
+    public UserDto get(@Positive @PathVariable Long id) {
         return userService.get(id);
     }
 
@@ -28,13 +29,13 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable long id, @RequestBody UserDto user) {
+    public UserDto update(@Positive @PathVariable long id, @RequestBody UserDto user) {
         user.setId(id);
         return userService.update(user);
     }
 
     @DeleteMapping("/{id}")
-    public UserDto delete(@PathVariable long id) {
+    public UserDto delete(@Positive @PathVariable long id) {
         return userService.delete(id);
     }
 }
