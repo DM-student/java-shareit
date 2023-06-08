@@ -29,8 +29,8 @@ public class ErrorHandler {
         }
 
         Map<String, String> response = new HashMap<>();
-        response.put("error", e.getClass().getSimpleName());
-        response.put("error_info", e.getMessage());
+        response.put("error", e.getMessage());
+        response.put("error_class", e.getClass().getSimpleName());
         if (e.getData() != null) {
             response.put("error_data", e.getData());
         }
