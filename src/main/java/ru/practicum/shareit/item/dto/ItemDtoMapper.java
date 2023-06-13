@@ -33,7 +33,7 @@ public class ItemDtoMapper implements ApplicationContextAware, InitializingBean 
         commentStorage = context.getBean(CommentDataBaseStorage.class);
         bookingMapper = context.getBean(BookingDtoMapper.class);
 
-        ItemDto itemDto = new ItemDto(item.getId(), null, item.getName(),
+        ItemDto itemDto = new ItemDto(item.getId(), null, item.getRequestId(), item.getName(),
                 item.getDescription(), item.getAvailable(), null, null, null, fullData);
         if (fullData) {
             if (item.getOwnerId() != null) {
@@ -94,7 +94,7 @@ public class ItemDtoMapper implements ApplicationContextAware, InitializingBean 
     }
 
     public Item mapFromDto(ItemDto itemDto) {
-        Item item = new Item(itemDto.getId(), null, itemDto.getName(),
+        Item item = new Item(itemDto.getId(), null, itemDto.getRequestId(), itemDto.getName(),
                 itemDto.getDescription(), itemDto.getAvailable());
         if (itemDto.getOwner() != null) {
             item.setOwnerId(itemDto.getOwner().getId());

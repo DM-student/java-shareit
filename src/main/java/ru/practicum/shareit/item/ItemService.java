@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.BookingState;
-import ru.practicum.shareit.data.BookingDataBaseStorage;
-import ru.practicum.shareit.data.CommentDataBaseStorage;
-import ru.practicum.shareit.data.ItemDataBaseStorage;
-import ru.practicum.shareit.data.UserDataBaseStorage;
+import ru.practicum.shareit.data.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentDtoMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -43,6 +40,8 @@ public class ItemService {
     private CommentDtoMapper commentMapper;
     @Autowired
     private BookingDataBaseStorage bookingStorage;
+    @Autowired
+    private ItemRequestDataBaseStorage requestStorage;
 
     public ItemDto get(long id, Long userId) {
         Optional<Item> itemOptional = storage.findById(id);
@@ -73,6 +72,9 @@ public class ItemService {
         if (userStorage.findById(newItem.getOwnerId()).isEmpty()) {
             throw new ShareItNotFoundException("Был указан несуществующий владелец.", newItem);
         }
+        if (item.getRequestId() != null) if (!requestStorage.existsById(item.getRequestId())) {
+            throw new ShareItNotFoundException("Запрос предмета (requestId) не найден.", item);
+        }
         item.setId(null);
         return mapper.mapToDto(storage.save(newItem), true);
     }
@@ -92,6 +94,9 @@ public class ItemService {
         if (!validation.validate(itemToUpdate)) {
             throw new ShareItValidationException("Предмет не прошёл валидацию.",
                     validation.validateFull(itemToUpdate));
+        }
+        if (item.getRequestId() != null) if (!requestStorage.existsById(item.getRequestId())) {
+            throw new ShareItNotFoundException("Запрос предмета (requestId) не найден.", item);
         }
 
         if (!Objects.equals(oldOwnerId, newItem.getOwnerId())) {

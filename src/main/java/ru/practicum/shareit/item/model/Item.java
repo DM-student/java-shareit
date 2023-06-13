@@ -15,6 +15,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @Table(name = "items")
 @SecondaryTable(name = "users_to_items", pkJoinColumns = @PrimaryKeyJoinColumn(name = "item_id"))
+@SecondaryTable(name = "requests_to_items", pkJoinColumns = @PrimaryKeyJoinColumn(name = "item_id"))
 public class Item {
 
     @Id
@@ -23,6 +24,9 @@ public class Item {
 
     @Column(table = "users_to_items", name = "user_id")
     private Long ownerId;
+
+    @Column(table = "requests_to_items", name = "request_id")
+    private Long requestId;
 
     @Column(name = "name")
     @NotBlank(message = "Название пустое!")
@@ -40,7 +44,7 @@ public class Item {
 
     // Хибернейт делает свои особые классы для объектов, из-за чего некоторые штуки ломаются.
     public Item getClearCopy() {
-        return new Item(id, ownerId, name, description, available);
+        return new Item(id, ownerId, requestId, name, description, available);
     }
 
 

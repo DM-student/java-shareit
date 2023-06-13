@@ -15,6 +15,7 @@ import java.util.List;
 public class ItemDto {
     private Long id;
     private UserDto owner;
+    private Long requestId;
     private String name;
     private String description;
     private Boolean available;

@@ -4,5 +4,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class ShareItTests {
-    // Тесты будут позже, если утвердят структуру проекта.
+    // МокТесты я подтяну как только одобрят остальную работу...
 }
