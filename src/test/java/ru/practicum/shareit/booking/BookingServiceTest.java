@@ -23,7 +23,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BookingServiceTest {
 
@@ -97,6 +98,7 @@ public class BookingServiceTest {
     void testPostSuccess() {
         assertEquals(testedClass.post(booking1DtoTestEntity), booking1DtoTestEntity);
     }
+
     @Test
     void testPostInvalidBooking() {
         booking1DtoTestEntity.setStatus(null);
@@ -108,6 +110,7 @@ public class BookingServiceTest {
     void testUpdateSuccess() {
         assertEquals(testedClass.update(booking1DtoTestEntity, 1L), booking1DtoTestEntity);
     }
+
     @Test
     void testFailUpdateByAnotherUser() {
         User user2ForTest = new User(2L, "sdfgsdfg", "vbncgf@mail.com");
@@ -117,12 +120,12 @@ public class BookingServiceTest {
 
     @Test
     void testGetAllSuccess() {
-        assertEquals(testedClass.getAll("ALL",1L, 0L, 20), List.of(booking1DtoTestEntity));
+        assertEquals(testedClass.getAll("ALL", 1L, 0L, 20), List.of(booking1DtoTestEntity));
     }
 
     @Test
     void testGetAllForOwnerSuccess() {
-        assertEquals(testedClass.getAllForOwner(5L, "ALL",5L, 0L, 20), List.of(booking1DtoTestEntity));
+        assertEquals(testedClass.getAllForOwner(5L, "ALL", 5L, 0L, 20), List.of(booking1DtoTestEntity));
     }
 
     @Test
@@ -134,6 +137,6 @@ public class BookingServiceTest {
     void testWithWrongUser() {
         assertThrows(ShareItNotFoundException.class, () -> testedClass.getById(1L, 999L));
         assertThrows(ShareItNotFoundException.class,
-                () -> testedClass.getAllForOwner(5L, "ALL",999L, 0L, 20));
+                () -> testedClass.getAllForOwner(5L, "ALL", 999L, 0L, 20));
     }
 }
