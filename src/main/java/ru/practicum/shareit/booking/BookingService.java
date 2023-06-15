@@ -40,7 +40,6 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         itemStorage = context.getBean(ItemDataBaseStorage.class);
         bookingMapper = context.getBean(BookingDtoMapper.class);
         validation = context.getBean(JavaxValidationHandler.class);
-
     }
 
     private ApplicationContext context;
