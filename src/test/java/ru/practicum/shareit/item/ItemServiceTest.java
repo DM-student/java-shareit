@@ -93,8 +93,11 @@ public class ItemServiceTest {
         Mockito.when(storage.findAll()).thenReturn(List.of(testedItem1));
 
         // userStorage
+        Mockito.when(userStorage.existsById(Mockito.anyLong())).thenReturn(false);
         Mockito.when(userStorage.existsById(1L)).thenReturn(true);
         Mockito.when(userStorage.existsById(2L)).thenReturn(true);
+        Mockito.when(userStorage.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+        Mockito.when(userStorage.findById(1L)).thenReturn(Optional.of(someUser1));
 
         // mapper
         Mockito.when(mapper.mapToDto(Mockito.eq(testedItem1), Mockito.anyBoolean(), Mockito.any()))
