@@ -69,7 +69,7 @@ public class ItemService {
             throw new ShareItValidationException("Предмет не прошёл валидацию.",
                     validation.validateFull(newItem));
         }
-        if (!userStorage.existsById(newItem.getOwnerId())) {
+        if (userStorage.findById(newItem.getOwnerId()).isEmpty()) {
             throw new ShareItNotFoundException("Был указан несуществующий владелец.", newItem);
         }
         if (item.getRequestId() != null) if (!requestStorage.existsById(item.getRequestId())) {
