@@ -19,6 +19,7 @@ import ru.practicum.shareit.utility.exceptions.ShareItProvidedDataException;
 import ru.practicum.shareit.utility.exceptions.ShareItValidationException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,7 +40,6 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         itemStorage = context.getBean(ItemDataBaseStorage.class);
         bookingMapper = context.getBean(BookingDtoMapper.class);
         validation = context.getBean(JavaxValidationHandler.class);
-
     }
 
     private ApplicationContext context;
@@ -74,7 +74,7 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         return bookingMapper.mapToDto(bookingStorage.save(bookingToUpdate), true);
     }
 
-    public List<BookingDto> getAll(String state, long userId) {
+    public List<BookingDto> getAll(String state, long userId, long from, long size) {
         if (!userStorage.existsById(userId)) {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + userId);
         }
@@ -84,29 +84,39 @@ public class BookingService implements ApplicationContextAware, InitializingBean
                 .map(booking -> bookingMapper.mapToDto(booking, true))
                 .collect(Collectors.toList());
 
+        List<BookingDto> finalOutput;
+
         switch (state) {
             case "ALL":
-                return out;
+                finalOutput = out;
+                break;
             case "FUTURE":
-                return out.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now())).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now())).collect(Collectors.toList());
+                break;
             case "PAST":
-                return out.stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+                break;
             case "CURRENT":
-                return out.stream()
+                finalOutput = out.stream()
                         .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()) && booking.getEnd().isAfter(LocalDateTime.now()))
                         .collect(Collectors.toList());
+                break;
             case "WAITING":
-                return out.stream().filter(booking -> booking.getStatus() == BookingState.WAITING).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStatus() == BookingState.WAITING).collect(Collectors.toList());
+                break;
             case "APPROVED":
-                return out.stream().filter(booking -> booking.getStatus() == BookingState.APPROVED).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStatus() == BookingState.APPROVED).collect(Collectors.toList());
+                break;
             case "REJECTED":
-                return out.stream().filter(booking -> booking.getStatus() == BookingState.REJECTED).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStatus() == BookingState.REJECTED).collect(Collectors.toList());
+                break;
             default:
                 throw new ShareItProvidedDataException("Unknown state: UNSUPPORTED_STATUS", state);
         }
+        return listToPageKnockOff(finalOutput, from, size);
     }
 
-    public List<BookingDto> getAllForOwner(long owner, String state, long userId) {
+    public List<BookingDto> getAllForOwner(long owner, String state, long userId, long from, long size) {
         if (!userStorage.existsById(userId)) {
             throw new ShareItNotFoundException("Пользователь не найден.", "user.id = " + userId);
         }
@@ -117,28 +127,36 @@ public class BookingService implements ApplicationContextAware, InitializingBean
                 .map(booking -> bookingMapper.mapToDto(booking, true))
                 .collect(Collectors.toList());
 
+        List<BookingDto> finalOutput;
+
         switch (state) {
             case "ALL":
-                return out;
+                finalOutput = out;
+                break;
             case "FUTURE":
-                return out.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now())).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now())).collect(Collectors.toList());
+                break;
             case "PAST":
-                return out.stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+                break;
             case "CURRENT":
-                return out.stream()
+                finalOutput = out.stream()
                         .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()) && booking.getEnd().isAfter(LocalDateTime.now()))
                         .collect(Collectors.toList());
+                break;
             case "WAITING":
-                return out.stream().filter(booking -> booking.getStatus() == BookingState.WAITING).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStatus() == BookingState.WAITING).collect(Collectors.toList());
+                break;
             case "APPROVED":
-                return out.stream().filter(booking -> booking.getStatus() == BookingState.APPROVED).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStatus() == BookingState.APPROVED).collect(Collectors.toList());
+                break;
             case "REJECTED":
-                return out.stream().filter(booking -> booking.getStatus() == BookingState.REJECTED).collect(Collectors.toList());
+                finalOutput = out.stream().filter(booking -> booking.getStatus() == BookingState.REJECTED).collect(Collectors.toList());
+                break;
             default:
                 throw new ShareItProvidedDataException("Unknown state: UNSUPPORTED_STATUS", state);
         }
-
-
+        return listToPageKnockOff(finalOutput, from, size);
     }
 
     private void applyBookingAndCheckOwner(Booking booking, Long updatingUser) {
@@ -207,5 +225,24 @@ public class BookingService implements ApplicationContextAware, InitializingBean
         }
         Item item = itemStorage.getById(booking.getItemId());
         return item.getOwnerId() == userId;
+    }
+
+    // ОЧЕНЬ ВАЖНО!!
+    // Почему так? А потому, что у меня уже построена логика на фильтрации в сервисе, я с ума сойду логику
+    // переносить на БД, рефакторя всё под ноль...
+    private List<BookingDto> listToPageKnockOff(List<BookingDto> list, long from, long size) {
+        List<BookingDto> listToReturn = new ArrayList<>();
+        if (from >= list.size()) {
+            return listToReturn;
+        }
+        int itemsAdded = 0;
+        for (int i = (int) from; i < list.size(); i++) {
+            listToReturn.add(list.get(i));
+            itemsAdded++;
+            if (itemsAdded == size) {
+                break;
+            }
+        }
+        return listToReturn;
     }
 }
