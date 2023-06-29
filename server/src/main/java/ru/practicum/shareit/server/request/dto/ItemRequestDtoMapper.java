@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.server.data.ItemDataBaseStorage;
 import ru.practicum.shareit.server.data.UserDataBaseStorage;
 import ru.practicum.shareit.server.item.dto.ItemDto;
-import ru.practicum.shareit.server.request.model.ItemRequest;
 import ru.practicum.shareit.server.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.server.request.model.ItemRequest;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.dto.UserDtoMapper;
 

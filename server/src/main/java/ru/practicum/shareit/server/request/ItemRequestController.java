@@ -3,8 +3,8 @@ package ru.practicum.shareit.server.request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.request.dto.ItemRequestDto;
-import ru.practicum.shareit.server.utility.exceptions.ShareItProvidedDataException;
 import ru.practicum.shareit.server.user.dto.UserDto;
+import ru.practicum.shareit.server.utility.exceptions.ShareItProvidedDataException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

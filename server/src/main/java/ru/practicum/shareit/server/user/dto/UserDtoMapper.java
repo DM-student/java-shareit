@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.server.data.ItemDataBaseStorage;
 import ru.practicum.shareit.server.item.dto.ItemDto;
-import ru.practicum.shareit.server.user.model.User;
 import ru.practicum.shareit.server.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.server.user.model.User;
 
 @Component
 public class UserDtoMapper {

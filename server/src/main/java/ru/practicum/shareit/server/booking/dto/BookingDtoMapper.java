@@ -36,7 +36,9 @@ public class BookingDtoMapper implements ApplicationContextAware, InitializingBe
     }
 
     public BookingDto mapToDto(Booking booking, boolean fullData) {
-        itemMapper = context.getBean(ItemDtoMapper.class);
+        if (itemMapper == null) {
+            itemMapper = context.getBean(ItemDtoMapper.class);
+        }
         BookingDto newBooking = new BookingDto(booking.getId(), null, null, booking.getStart(), booking.getEnd(),
                 booking.getState(), null, null, true);
 

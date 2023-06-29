@@ -3,14 +3,14 @@ package ru.practicum.shareit.server.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.server.data.UserDataBaseStorage;
+import ru.practicum.shareit.server.item.ItemService;
+import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.dto.UserDtoMapper;
 import ru.practicum.shareit.server.user.model.User;
+import ru.practicum.shareit.server.utility.JavaxValidationHandler;
 import ru.practicum.shareit.server.utility.exceptions.ShareItConflictException;
 import ru.practicum.shareit.server.utility.exceptions.ShareItNotFoundException;
 import ru.practicum.shareit.server.utility.exceptions.ShareItValidationException;
-import ru.practicum.shareit.server.item.ItemService;
-import ru.practicum.shareit.server.user.dto.UserDto;
-import ru.practicum.shareit.server.utility.JavaxValidationHandler;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
