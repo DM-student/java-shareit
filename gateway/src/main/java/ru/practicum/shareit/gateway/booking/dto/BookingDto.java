@@ -3,7 +3,6 @@ package ru.practicum.shareit.gateway.booking.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit_gateway.booking.model.BookingState;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 

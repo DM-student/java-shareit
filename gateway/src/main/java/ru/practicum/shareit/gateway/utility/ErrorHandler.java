@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.practicum.shareit.gateway.utility.exceptions.*;
-import ru.practicum.shareit_gateway.utility.exceptions.*;
 
 import java.util.HashMap;
 import java.util.Map;

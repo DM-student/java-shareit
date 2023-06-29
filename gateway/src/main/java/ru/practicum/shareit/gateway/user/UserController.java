@@ -1,41 +1,40 @@
 package ru.practicum.shareit.gateway.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
     @Autowired
-    private UserService userService;
+    private UserClient client;
 
     @GetMapping("/{id}")
-    public UserDto get(@Positive @PathVariable Long id) {
-        return userService.get(id);
+    public ResponseEntity<Object> get(@Positive @PathVariable Long id) {
+        return client.getUser(id);
     }
 
     @GetMapping
-    public List<UserDto> getAll() {
-        return userService.getAll();
+    public ResponseEntity<Object> getAll() {
+        return client.getUsers();
     }
 
     @PostMapping
-    public UserDto upload(@RequestBody UserDto user) {
-        return userService.upload(user);
+    public ResponseEntity<Object> upload(@RequestBody UserDto user) {
+        return client.postUser(user);
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@Positive @PathVariable long id, @RequestBody UserDto user) {
-        user.setId(id);
-        return userService.update(user);
+    public ResponseEntity<Object> update(@Positive @PathVariable long id, @RequestBody UserDto user) {
+        return client.updateUser(id, user);
     }
 
     @DeleteMapping("/{id}")
-    public UserDto delete(@Positive @PathVariable long id) {
-        return userService.delete(id);
+    public ResponseEntity<Object> delete(@Positive @PathVariable long id) {
+        return client.deleteUser(id);
     }
 }

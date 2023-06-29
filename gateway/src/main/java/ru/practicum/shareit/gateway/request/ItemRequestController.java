@@ -1,5 +1,5 @@
 package ru.practicum.shareit.gateway.request;
-
+/*
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
@@ -65,3 +65,4 @@ public class ItemRequestController {
         return service.update(request);
     }
 }
+ */
