@@ -53,10 +53,8 @@ public class ItemRequestClient extends BaseClient {
     }
 
     public ResponseEntity<Object> updateRequest(long id, long userId, ItemRequestDto body) {
-        if (body != null) {
-            if (body.getDescription().isBlank()) {
-                throw new ShareItProvidedDataException("Содержание заявки не должно быть пустым.", body);
-            }
+        if (body != null && body.getDescription().isBlank()) {
+            throw new ShareItProvidedDataException("Содержание заявки не должно быть пустым.", body);
         }
         return patch("/" + id, userId, body);
     }

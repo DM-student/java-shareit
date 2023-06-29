@@ -35,9 +35,9 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<Object> getAll(@Positive @RequestHeader(name = "X-Sharer-User-Id") long userId,
-                                         @RequestParam(required = false, defaultValue = "0") Integer from,
-                                         @Positive @RequestParam(required = false, defaultValue = "" + Integer.MAX_VALUE) Integer size,
-                                         @RequestParam(required = false, defaultValue = "ALL") String state) {
+                                         @RequestParam(defaultValue = "0") Integer from,
+                                         @Positive @RequestParam(defaultValue = "" + Integer.MAX_VALUE) Integer size,
+                                         @RequestParam(defaultValue = "ALL") String state) {
 
 
         return client.getAllBookings(userId, from, size, state);
@@ -46,9 +46,9 @@ public class BookingController {
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getAllForOwner(@Positive @RequestHeader(name = "X-Sharer-User-Id") long userId,
-                                                 @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                 @Positive @RequestParam(required = false, defaultValue = "" + Integer.MAX_VALUE) Integer size,
-                                                 @RequestParam(required = false, defaultValue = "ALL") String state) {
+                                                 @RequestParam(defaultValue = "0") Integer from,
+                                                 @Positive @RequestParam(defaultValue = "" + Integer.MAX_VALUE) Integer size,
+                                                 @RequestParam(defaultValue = "ALL") String state) {
 
 
         return client.getAllBookingsForOwner(userId, from, size, state);

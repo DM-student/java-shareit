@@ -98,40 +98,26 @@ public class BookingClient extends BaseClient {
     // Почему так? А потому что иначе аннотационные валидаторы
     // будут с ума сходить от null'ов, которые могут быть отосланы.
     private void validateBooking(BookingDto booking) {
-        if (booking.getId() != null) {
-            if (booking.getId() <= 0) {
-                throw new ShareItProvidedDataException("ID должен быть больше нуля.", booking);
-            }
+        if (booking.getId() != null && booking.getId() <= 0) {
+            throw new ShareItProvidedDataException("ID должен быть больше нуля.", booking);
         }
-        if (booking.getItemId() != null) {
-            if (booking.getItemId() <= 0) {
-                throw new ShareItProvidedDataException("ID предмета должен быть больше нуля.", booking);
-            }
+        if (booking.getItemId() != null && booking.getItemId() <= 0) {
+            throw new ShareItProvidedDataException("ID предмета должен быть больше нуля.", booking);
         }
-        if (booking.getBookerId() != null) {
-            if (booking.getBookerId() <= 0) {
-                throw new ShareItProvidedDataException("ID арендатора должен быть больше нуля.", booking);
-            }
+        if (booking.getBookerId() != null && booking.getBookerId() <= 0) {
+            throw new ShareItProvidedDataException("ID арендатора должен быть больше нуля.", booking);
         }
-        if (booking.getStart() != null) {
-            if (booking.getStart().isBefore(LocalDateTime.now())) {
-                throw new ShareItProvidedDataException("Начало аренды не должно быть в прошлом.", booking);
-            }
+        if (booking.getStart() != null && booking.getStart().isBefore(LocalDateTime.now())) {
+            throw new ShareItProvidedDataException("Начало аренды не должно быть в прошлом.", booking);
         }
-        if (booking.getEnd() != null) {
-            if (booking.getEnd().isBefore(LocalDateTime.now())) {
-                throw new ShareItProvidedDataException("Конец аренды не должен быть в прошлом.", booking);
-            }
+        if (booking.getEnd() != null && booking.getEnd().isBefore(LocalDateTime.now())) {
+            throw new ShareItProvidedDataException("Конец аренды не должен быть в прошлом.", booking);
         }
-        if (booking.getEnd() != null && booking.getStart() != null) {
-            if (booking.getEnd().isBefore(booking.getStart())) {
-                throw new ShareItProvidedDataException("Конец аренды не должен быть раньше начала.", booking);
-            }
+        if (booking.getEnd() != null && booking.getStart() != null && booking.getEnd().isBefore(booking.getStart())) {
+            throw new ShareItProvidedDataException("Конец аренды не должен быть раньше начала.", booking);
         }
-        if (booking.getEnd() != null && booking.getStart() != null) {
-            if (booking.getEnd().isBefore(booking.getStart())) {
-                throw new ShareItProvidedDataException("Конец аренды не должен быть раньше начала.", booking);
-            }
+        if (booking.getEnd() != null && booking.getStart() != null && booking.getEnd().isBefore(booking.getStart())) {
+            throw new ShareItProvidedDataException("Конец аренды не должен быть раньше начала.", booking);
         }
         if (booking.getItem() != null) {
             if (booking.getItem().getId() != null) {
@@ -140,12 +126,8 @@ public class BookingClient extends BaseClient {
                 }
             }
         }
-        if (booking.getBooker() != null) {
-            if (booking.getBooker().getId() != null) {
-                if (booking.getBooker().getId() <= 0) {
-                    throw new ShareItProvidedDataException("ID арендатора должен быть больше нуля.", booking);
-                }
-            }
+        if (booking.getBooker() != null && booking.getBooker().getId() != null && booking.getBooker().getId() <= 0) {
+            throw new ShareItProvidedDataException("ID арендатора должен быть больше нуля.", booking);
         }
     }
 }

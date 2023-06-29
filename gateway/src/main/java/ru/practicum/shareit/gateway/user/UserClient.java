@@ -56,15 +56,11 @@ public class UserClient extends BaseClient {
     }
 
     private void validateUser(UserDto user) {
-        if (user.getName() != null) {
-            if (user.getName().isBlank()) {
-                throw new ShareItProvidedDataException("Имя не должно быть пустым.", user);
-            }
+        if (user.getName() != null && user.getName().isBlank()) {
+            throw new ShareItProvidedDataException("Имя не должно быть пустым.", user);
         }
-        if (user.getEmail() != null) {
-            if (user.getEmail().isBlank()) {
-                throw new ShareItProvidedDataException("Почта не должна быть пустой.", user);
-            }
+        if (user.getEmail() != null && user.getEmail().isBlank()) {
+            throw new ShareItProvidedDataException("Почта не должна быть пустой.", user);
         }
         // Остальное в ДТОшке роли не играет при отправке запроса.
     }

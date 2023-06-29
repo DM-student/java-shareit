@@ -45,7 +45,7 @@ public class ItemClient extends BaseClient {
 
     public ResponseEntity<Object> getItems(Long userId) {
         if (userId == null) {
-            get("");
+            return get("");
         }
         return get("", userId);
     }
@@ -66,8 +66,6 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> postComment(long userId, long itemId, CommentDto body) {
-        // Раздельно, ибо использование && не спасёт от НуллПоинтера при попытке вызвать isBlank(),
-        // по крайней мере на моей практике это было так.
         if (body.getText() == null) {
             throw new ShareItProvidedDataException("Текст комментария не должен быть пустым.", body);
         }
@@ -78,25 +76,17 @@ public class ItemClient extends BaseClient {
     }
 
     private void validateItem(ItemDto item) {
-        if (item.getId() != null) {
-            if (item.getId() <= 0) {
-                throw new ShareItProvidedDataException("ID должен быть больше нуля.", item);
-            }
+        if (item.getId() != null && item.getId() <= 0) {
+            throw new ShareItProvidedDataException("ID должен быть больше нуля.", item);
         }
-        if (item.getRequestId() != null) {
-            if (item.getRequestId() <= 0) {
-                throw new ShareItProvidedDataException("ID заявки должен быть больше нуля.", item);
-            }
+        if (item.getRequestId() != null && item.getRequestId() <= 0) {
+            throw new ShareItProvidedDataException("ID заявки должен быть больше нуля.", item);
         }
-        if (item.getName() != null) {
-            if (item.getName().isBlank()) {
-                throw new ShareItProvidedDataException("Название не должно быть пустым.", item);
-            }
+        if (item.getName() != null && item.getName().isBlank()) {
+            throw new ShareItProvidedDataException("Название не должно быть пустым.", item);
         }
-        if (item.getDescription() != null) {
-            if (item.getDescription().isBlank()) {
-                throw new ShareItProvidedDataException("Описание не должно быть пустым.", item);
-            }
+        if (item.getDescription() != null && item.getDescription().isBlank()) {
+            throw new ShareItProvidedDataException("Описание не должно быть пустым.", item);
         }
         // Остальное в ДТОшке роли не играет при отправке запроса.
     }
