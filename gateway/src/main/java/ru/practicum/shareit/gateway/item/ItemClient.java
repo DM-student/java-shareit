@@ -39,8 +39,8 @@ public class ItemClient extends BaseClient {
         return post("", userId, body);
     }
 
-    public ResponseEntity<Object> getItem(long userId, long ItemId) {
-        return get("/" + ItemId, userId);
+    public ResponseEntity<Object> getItem(long userId, long itemId) {
+        return get("/" + itemId, userId);
     }
 
     public ResponseEntity<Object> getItems(Long userId) {
@@ -57,8 +57,8 @@ public class ItemClient extends BaseClient {
         return patch("/{id}", userId, Map.of("id", itemId), body);
     }
 
-    public ResponseEntity<Object> deleteItem(long ItemId) {
-        return delete("/" + ItemId);
+    public ResponseEntity<Object> deleteItem(long itemId) {
+        return delete("/" + itemId);
     }
 
     public ResponseEntity<Object> searchItem(String query) {
