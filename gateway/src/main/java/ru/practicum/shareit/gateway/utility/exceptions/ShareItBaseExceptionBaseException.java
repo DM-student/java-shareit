@@ -2,7 +2,8 @@ package ru.practicum.shareit.gateway.utility.exceptions;
 
 public class ShareItBaseExceptionBaseException extends RuntimeException {
     private final String errorInfo;
-    private final String errorData;
+    private String errorData; // Если я его сделаю файнал - он будет ТРЕБОВАТЬ определения этой переменной,
+    // по этому у меня и стоял там редундантный else, цель которого была просто "успокоить" компилятор и IDE.
 
     @Override
     public String getMessage() {
@@ -20,8 +21,6 @@ public class ShareItBaseExceptionBaseException extends RuntimeException {
         errorInfo = info;
         if (data != null) {
             errorData = data.toString();
-        } else {
-            errorData = null;
         }
     }
 }
